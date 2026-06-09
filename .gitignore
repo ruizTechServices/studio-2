@@ -44,3 +44,4 @@ next-env.d.ts
 # project docs
 docs/*
 !docs/LOGGING.md
+!docs/OLLAMA.md

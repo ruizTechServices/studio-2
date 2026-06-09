@@ -35,10 +35,18 @@ Create a `.env.local` file at the project root (never commit this):
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
+OLLAMA_GPU_BASE_URL=http://100.86.175.53:11435
+OLLAMA_DEFAULT_MODEL=qwen2.5:7b-instruct-q4_K_M
+OLLAMA_NUM_CTX=4096
+OLLAMA_NUM_PREDICT=256
+OLLAMA_RESERVED_RESPONSE_TOKENS=256
+OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never use a `NEXT_PUBLIC_`
-prefix. See `docs/LOGGING.md` for centralized logging setup and usage.
+prefix. The Ollama variables are also server-only. See `docs/LOGGING.md` for
+centralized logging setup and usage and `docs/OLLAMA.md` for the stateless
+local AI endpoints.
 
 ## Project Structure
 

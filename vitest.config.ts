@@ -16,7 +16,12 @@ export default defineConfig({
     unstubGlobals: true,
     coverage: {
       provider: 'v8',
-      include: ['lib/logger/**/*.ts', 'app/api/log/route.ts'],
+      include: [
+        'lib/logger/**/*.ts',
+        'lib/ai/**/*.ts',
+        'app/api/log/route.ts',
+        'app/api/ai/**/route.ts',
+      ],
       exclude: ['**/*.test.ts'],
     },
   },
