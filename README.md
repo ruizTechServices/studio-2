@@ -45,21 +45,40 @@ prefix. See `docs/LOGGING.md` for centralized logging setup and usage.
 ```
 studio-2/
 ├── app/
-│   ├── layout.tsx        # Root layout — fonts, global styles
-│   └── page.tsx          # Home page (placeholder)
+│   ├── api/
+│   │   └── log/
+│   │       ├── route.ts        # POST /api/log — client-side log ingestion endpoint
+│   │       └── route.test.ts
+│   ├── layout.tsx              # Root layout — fonts, global styles
+│   └── page.tsx                # Home page (placeholder)
 ├── components/
 │   └── ui/
-│       └── button.tsx    # shadcn/ui Button component
+│       └── button.tsx          # shadcn/ui Button component
 ├── lib/
-│   ├── client.ts         # Supabase browser client
-│   ├── server.ts         # Supabase server client (RSC / Server Actions)
-│   ├── middleware.ts      # Supabase session middleware helper
-│   └── utils.ts          # cn() utility (clsx + tailwind-merge)
-├── public/               # Static assets
-├── components.json       # shadcn/ui config
-├── next.config.ts        # Next.js config
-├── tsconfig.json         # TypeScript config
-└── AGENTS.md             # AI agent rules for this repo
+│   ├── logger/
+│   │   ├── client.ts           # Client-side logger (posts to /api/log)
+│   │   ├── server.ts           # Server-side logger (writes directly to Supabase)
+│   │   ├── sanitize.ts         # Recursive redaction of sensitive keys
+│   │   ├── types.ts            # LogLevel, LogSource, LogInput, StoredLogEntry
+│   │   └── validation.ts       # validateLogInput(), isUuid()
+│   ├── client.ts               # Supabase browser client
+│   ├── server.ts               # Supabase server client (RSC / Server Actions)
+│   ├── middleware.ts           # Supabase session middleware helper
+│   └── utils.ts                # cn() utility (clsx + tailwind-merge)
+├── supabase/
+│   ├── migrations/
+│   │   └── 20260609000000_create_logs.sql   # public.logs table + RLS + indexes
+│   └── sql/
+│       └── enable_logs_retention.sql        # pg_cron daily purge (logs > 30d)
+├── docs/
+│   ├── LOGGING.md              # Logging system usage guide
+│   └── IMPLEMENTATION_LOG.md  # Historical setup log
+├── public/                     # Static assets
+├── components.json             # shadcn/ui config
+├── next.config.ts              # Next.js config
+├── vitest.config.ts            # Vitest test runner config
+├── tsconfig.json               # TypeScript config
+└── AGENTS.md                   # AI agent rules for this repo
 ```
 
 ## Key Conventions
@@ -69,14 +88,18 @@ studio-2/
 - `lib/middleware.ts` exports `updateSession()` — wire it into a `middleware.ts` file at the project root to keep auth sessions alive.
 - All component aliases route through `@/` (mapped to the project root in `tsconfig.json`).
 - `cn()` from `lib/utils.ts` is the standard utility for conditional Tailwind classes.
+- Use `lib/logger/server.ts` from Route Handlers, Server Actions, and server code. Use `lib/logger/client.ts` from Client Components. See `docs/LOGGING.md` for full usage.
 
 ## Scripts
 
 ```bash
-npm run dev      # Start dev server
-npm run build    # Production build
-npm run start    # Start production server
-npm run lint     # ESLint
+npm run dev           # Start dev server
+npm run build         # Production build
+npm run start         # Start production server
+npm run lint          # ESLint
+npm run test          # Vitest (run once)
+npm run test:watch    # Vitest watch mode
+npm run test:coverage # Vitest with coverage report
 ```
 
 ## Product Direction
@@ -90,4 +113,4 @@ The goal of this studio is to become a tool developers use when inheriting, reco
 
 See `docs/IMPLEMENTATION_LOG.md` for the full setup history.
 
-> Last auto-updated: 2026-06-08
+> Last auto-updated: 2026-06-09
