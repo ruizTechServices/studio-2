@@ -34,7 +34,11 @@ Create a `.env.local` file at the project root (never commit this):
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
 ```
+
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and must never use a `NEXT_PUBLIC_`
+prefix. See `docs/LOGGING.md` for centralized logging setup and usage.
 
 ## Project Structure
 
