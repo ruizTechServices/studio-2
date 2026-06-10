@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Boxes,
   FolderGit2,
@@ -8,6 +10,7 @@ import {
   Settings,
 } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import { BrandLogo } from '@/components/brand/brand-logo'
 import { dashboardNavigation } from '@/config/navigation'
@@ -25,6 +28,8 @@ const navigationIcons = {
 } as const
 
 export function AppSidebar() {
+  const pathname = usePathname()
+
   return (
     <aside className="min-w-0 max-w-full border-b bg-sidebar lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:border-r lg:border-b-0">
       <div className="flex h-full min-w-0 flex-col">
@@ -39,16 +44,19 @@ export function AppSidebar() {
         >
           {dashboardNavigation.map((item) => {
             const Icon = navigationIcons[item.label]
-            const isOverview = item.href === '/dashboard'
+            const isActive =
+              item.href === '/dashboard'
+                ? pathname === item.href
+                : pathname.startsWith(item.href)
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                aria-current={isOverview ? 'page' : undefined}
+                aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  isOverview
+                  isActive
                     ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                 )}
