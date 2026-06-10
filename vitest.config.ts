@@ -19,8 +19,11 @@ export default defineConfig({
       include: [
         'lib/logger/**/*.ts',
         'lib/ai/**/*.ts',
+        'lib/intake/**/*.ts',
         'app/api/log/route.ts',
         'app/api/ai/**/route.ts',
+        'app/api/projects/**/route.ts',
+        'app/api/scans/**/route.ts',
       ],
       exclude: ['**/*.test.ts'],
     },
