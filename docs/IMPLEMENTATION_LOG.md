@@ -485,21 +485,20 @@ mobile render         passed at 390x844 with no horizontal overflow
 browser workflow      passed inline URL validation and safe persistence failure
 ```
 
-The successful persisted browser path remains blocked until authoritative
-Supabase project `lyclwqvmbhiwlxffcnbw` is reconnected and the migration is
-applied.
+Authoritative Supabase project `lyclwqvmbhiwlxffcnbw` is linked. The migrations
+were applied with matching local/remote history, and the real API path created
+and retrieved durable queued scans. A follow-up migration narrowed inherited
+`service_role` grants to the minimum Phase 1 table privileges. Remote security
+advisors, performance advisors, and schema lint report no issues.
 
 ### Serious Next Delivery Sequence
 
-1. Reconnect and verify the authoritative Supabase project. Confirm the existing
-   logs migration independently, apply the intake migration, and run security
-   and performance advisors.
-2. Verify real project/scan creation through the browser before changing the
-   schema or enabling queue infrastructure.
-3. Implement Phase 2 as a private, service-role-only queue and separate
+1. Keep migration history aligned and run security/performance advisors after
+   every schema change.
+2. Implement Phase 2 as a private, service-role-only queue and separate
    single-concurrency Node worker with durable events, leases, visibility
    timeout, bounded retries, terminal failure classification, and cleanup.
-4. Implement Phase 3 hostile-input defenses and GitHub archive fixtures before
+3. Implement Phase 3 hostile-input defenses and GitHub archive fixtures before
    downloading or extracting any repository content.
-5. Implement deterministic JS/TS evidence persistence before system-map,
+4. Implement deterministic JS/TS evidence persistence before system-map,
    reusable-asset, current-status, or AI-summary features.

@@ -134,7 +134,8 @@ studio-2/
 ├── supabase/
 │   ├── migrations/
 │   │   ├── 20260609000000_create_logs.sql   # public.logs table + RLS + indexes
-│   │   └── 20260610214115_create_project_intake_foundation.sql
+│   │   ├── 20260610214115_create_project_intake_foundation.sql
+│   │   └── 20260610233821_restrict_phase_1_service_role_grants.sql
 │   └── sql/
 │       └── enable_logs_retention.sql        # pg_cron daily purge (logs > 30d)
 ├── docs/

@@ -38,7 +38,8 @@ Completed since initial scaffold:
 - `app/api/scans/[scanId]/route.ts` — local-only safe scan status
 - `app/dashboard/import/page.tsx` + `components/intake/project-intake-form.tsx` — Phase 1 intake UI
 - `supabase/migrations/20260610214115_create_project_intake_foundation.sql` — projects/scans schema and service-role-only transactional RPC
-- `docs/PROJECT-INTAKE.md` — intake contract, security policy, limits, phased plan, and operational blocker
+- `supabase/migrations/20260610233821_restrict_phase_1_service_role_grants.sql` — minimum Phase 1 service-role table privileges
+- `docs/PROJECT-INTAKE.md` — intake contract, security policy, limits, phased plan, and operational status
 
 ## Architecture Rules
 
@@ -66,13 +67,11 @@ Completed since initial scaffold:
 
 ## Next Steps (in order)
 
-1. Apply Supabase migration if not yet done: `supabase/migrations/20260609000000_create_logs.sql`.
-2. (Optional) Enable log retention: run `supabase/sql/enable_logs_retention.sql` after confirming `pg_cron` is enabled.
-3. Reconnect and verify authoritative Supabase project `lyclwqvmbhiwlxffcnbw`.
-4. Apply and verify the Phase 1 intake migration; run security and performance advisors.
-5. Build Phase 2 private queue and single-concurrency worker with leases, retries, events, and cleanup.
-6. Build bounded GitHub archive intake and hostile-input fixtures.
-7. Add deterministic JS/TS scanning before system-map, reusable-asset, status-summary, or AI-summary work.
+1. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
+2. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
+3. Build Phase 2 private queue and single-concurrency worker with leases, retries, events, and cleanup.
+4. Build bounded GitHub archive intake and hostile-input fixtures.
+5. Add deterministic JS/TS scanning before system-map, reusable-asset, status-summary, or AI-summary work.
 
 ## Environment Variables
 

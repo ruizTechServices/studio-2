@@ -88,9 +88,11 @@ Migration:
 - Public, anon, and authenticated access is revoked.
 - Only `service_role` receives the minimum Phase 1 table and function grants.
 
-The migration is committed but must not be applied until the authoritative
-Supabase project `lyclwqvmbhiwlxffcnbw` is connected and verified. Do not apply
-it to unrelated connected projects.
+The authoritative Supabase project `lyclwqvmbhiwlxffcnbw` is linked and the
+Phase 1 migrations are applied. A follow-up migration explicitly narrows
+`service_role` table privileges because Supabase default privileges initially
+granted broader access than Phase 1 requires. Remote security advisors,
+performance advisors, and schema lint report no issues.
 
 ## Intake Policy Limits
 
@@ -127,13 +129,11 @@ explainable and reproducible.
 
 ## Operational Next Steps
 
-1. Reconnect and verify authoritative Supabase project
-   `lyclwqvmbhiwlxffcnbw`.
-2. Confirm the existing `public.logs` migration state separately.
-3. Apply the project-intake migration and run Supabase security and performance
-   advisors.
-4. Exercise the persisted browser intake workflow locally.
-5. Begin Phase 2 only after the Phase 1 schema and access controls are verified.
+1. Keep local and remote migration history aligned through the Supabase CLI.
+2. Run Supabase security and performance advisors after every schema change.
+3. Add `PROJECT_INTAKE_ENABLED=true` to `.env.local` when exercising intake
+   locally. Production intake remains hidden regardless of this value.
+4. Begin Phase 2 only after its queue and worker security contract is reviewed.
 
 Live Supabase and GitHub network smoke tests should remain outside normal PR CI.
 Normal CI should run lint, strict TypeScript, unit tests, and the production
