@@ -22,7 +22,8 @@ This is a clean Next.js rebuild of `ruizTechStudio`, starting from a clarified p
 
 ## Current Implementation Status
 
-The deterministic application foundation is complete:
+The deterministic application foundation and local-only Phase 1 intake
+skeleton are complete:
 
 - App Router shell, marketing landing page, and dashboard overview
 - Centralized server/client logging with Supabase persistence support
@@ -30,9 +31,14 @@ The deterministic application foundation is complete:
 - Project-owned logo, favicon, app-icon, and placement-illustration library
 - Reusable accessible animations for scanning, system mapping, asset extraction,
   project analysis, and subtle dashboard panel motion
+- Exact public GitHub repository URL and ref validation
+- Local-only `/dashboard/import` workflow with durable queued scan creation and
+  safe scan-status polling
+- Supabase `projects` and `scans` migration with RLS and service-role-only access
 
-The next product milestone is the project intake flow. Project-feature routes
-should remain unimplemented until intake produces a validated normalized result.
+The next product milestone is the private queue and worker. Downstream
+project-feature routes should remain unimplemented until intake produces a
+validated normalized result.
 
 ## Getting Started
 
@@ -51,6 +57,7 @@ Create a `.env.local` file at the project root (never commit this):
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
+PROJECT_INTAKE_ENABLED=true
 OLLAMA_GPU_BASE_URL=http://100.86.175.53:11435
 OLLAMA_DEFAULT_MODEL=qwen2.5:7b-instruct-q4_K_M
 OLLAMA_NUM_CTX=4096
@@ -62,7 +69,8 @@ OLLAMA_CHAT_TIMEOUT_MS=120000
 `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never use a `NEXT_PUBLIC_`
 prefix. The Ollama variables are also server-only. See `docs/LOGGING.md` for
 centralized logging setup and usage, `docs/OLLAMA.md` for the stateless local AI
-endpoints, and `docs/VISUAL-ASSETS.md` for the brand and animation system.
+endpoints, `docs/PROJECT-INTAKE.md` for the local-only intake contract, and
+`docs/VISUAL-ASSETS.md` for the brand and animation system.
 
 ## Project Structure
 
@@ -82,6 +90,7 @@ studio-2/
 │   │       └── route.test.ts
 │   ├── dashboard/
 │   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
+│   │   ├── import/page.tsx          # Local-only public GitHub intake surface
 │   │   └── page.tsx                # Dashboard overview page
 │   ├── apple-icon.png              # Next.js Apple touch icon
 │   ├── icon.svg                    # Next.js scalable app icon
@@ -117,19 +126,22 @@ studio-2/
 │   │   ├── sanitize.ts             # Recursive redaction of sensitive keys
 │   │   ├── types.ts                # LogLevel, LogSource, LogInput, StoredLogEntry
 │   │   └── validation.ts           # validateLogInput(), isUuid()
+│   ├── intake/                      # Intake contracts, policy, validation, persistence, and URL builders
 │   ├── client.ts                   # Supabase browser client
 │   ├── server.ts                   # Supabase server client (RSC / Server Actions)
 │   ├── middleware.ts               # Supabase session middleware helper
 │   └── utils.ts                    # cn() utility (clsx + tailwind-merge)
 ├── supabase/
 │   ├── migrations/
-│   │   └── 20260609000000_create_logs.sql   # public.logs table + RLS + indexes
+│   │   ├── 20260609000000_create_logs.sql   # public.logs table + RLS + indexes
+│   │   └── 20260610214115_create_project_intake_foundation.sql
 │   └── sql/
 │       └── enable_logs_retention.sql        # pg_cron daily purge (logs > 30d)
 ├── docs/
 │   ├── IMPLEMENTATION_LOG.md  # Historical implementation record and current milestone updates
 │   ├── LOGGING.md              # Logging system usage guide
 │   ├── OLLAMA.md               # Ollama AI integration guide
+│   ├── PROJECT-INTAKE.md       # Phase 1 intake contract, policy, and phased plan
 │   └── VISUAL-ASSETS.md        # Brand, illustration, favicon, and animation inventory
 ├── public/
 │   ├── brand/                  # Static logo variants, favicon sources, and app icons
@@ -177,6 +189,7 @@ The goal of this studio is to become a tool developers use when inheriting, reco
 - **System visualization** — interactive graph of architecture and dependencies
 
 See `docs/IMPLEMENTATION_LOG.md` for the full setup history.
+See `docs/PROJECT-INTAKE.md` for the project intake contract and phased plan.
 See `docs/VISUAL-ASSETS.md` for the implemented visual foundation and adoption guidance.
 
 > Last auto-updated: 2026-06-10

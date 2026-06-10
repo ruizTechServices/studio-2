@@ -43,8 +43,8 @@ The mission is simple. The execution is not.
 
 ## CURRENT OBJECTIVE
 
-> **Build the project intake contract and first real intake surface before
-> expanding into downstream project features.**
+> **Verify the local-only Phase 1 intake foundation, then add durable private
+> queue processing before repository fetching or scanning.**
 
 The deterministic foundation is complete: app shell, marketing surface,
 logging, stateless Ollama integration, and the visual asset system. The next
@@ -55,7 +55,7 @@ automation before the intake contract is stable.
 
 ## CURRENT MILESTONE SNAPSHOT — 2026-06-10
 
-Branch: `app-shell`
+Branch: `codex/project-intake-foundation`
 
 Completed:
 
@@ -71,6 +71,14 @@ Completed:
 - Homepage hero, marketing chrome, dashboard sidebar, and dashboard ambient
   motion integrations
 - Visual asset inventory and usage guidance in `docs/VISUAL-ASSETS.md`
+- Local-only project intake foundation:
+  - Exact public GitHub URL and separate ref validation
+  - Central resource-limit and environment-gate policy
+  - Durable `projects` and immutable queued `scans` schema
+  - Service-role-only transactional project/scan creation RPC
+  - Gated project import and scan-status APIs
+  - `/dashboard/import` form, queued status, and two-second status polling
+  - Phase 1 tests and `docs/PROJECT-INTAKE.md`
 
 Verified:
 
@@ -82,8 +90,9 @@ Verified:
 
 Not started:
 
-- Project intake contract and `/dashboard/import` implementation
-- Persistent project/system model
+- Private Supabase Queue and scan worker
+- Repository fetching, safe archive extraction, and deterministic scanning
+- Persistent scan evidence beyond projects and scan runs
 - System map, reusable-assets, and work-session feature surfaces
 
 ---
@@ -435,4 +444,62 @@ Browser DOM check     passed: homepage and dashboard, no console errors/warnings
 The intake contract is the gating decision. Building downstream pages before
 that contract exists would create speculative schemas and misleading UI.
 
-Current implementation branch: `app-shell`
+Current implementation branch: `codex/project-intake-foundation`
+
+---
+
+## PROJECT INTAKE PHASE 1 — 2026-06-10
+
+### Implemented
+
+- Added central intake contracts, policy limits, environment gate, strict
+  GitHub URL/ref validation, safe URL builders, and service-role persistence
+  helpers under `lib/intake/`.
+- Added a Supabase migration for `public.projects`, immutable scan identity in
+  `public.scans`, RLS, minimum service-role grants, and transactional
+  `public.create_project_scan(...)`.
+- Added local-only `POST /api/projects/import` and
+  `GET /api/scans/[scanId]` routes.
+- Added `/dashboard/import` with inline validation, safe errors, queued status,
+  two-second visible-page polling, existing intake visuals, and responsive
+  layout.
+- Corrected dashboard navigation so the active route is represented accurately.
+
+### Intentionally Deferred
+
+- Queue, worker, repository fetching, archive handling, source parsing,
+  deterministic findings, Ollama summaries, production authorization, and
+  downstream project views.
+- Applying the migration to a live Supabase project.
+
+### Verification
+
+```text
+npm run lint          passed
+npx tsc --noEmit      passed
+npm run test          passed: 20 files, 173 tests
+npm run test:coverage passed: 92.12% statements, 86.15% branches
+npm run build         passed
+desktop render        passed at 1440x1000
+mobile render         passed at 390x844 with no horizontal overflow
+browser workflow      passed inline URL validation and safe persistence failure
+```
+
+The successful persisted browser path remains blocked until authoritative
+Supabase project `lyclwqvmbhiwlxffcnbw` is reconnected and the migration is
+applied.
+
+### Serious Next Delivery Sequence
+
+1. Reconnect and verify the authoritative Supabase project. Confirm the existing
+   logs migration independently, apply the intake migration, and run security
+   and performance advisors.
+2. Verify real project/scan creation through the browser before changing the
+   schema or enabling queue infrastructure.
+3. Implement Phase 2 as a private, service-role-only queue and separate
+   single-concurrency Node worker with durable events, leases, visibility
+   timeout, bounded retries, terminal failure classification, and cleanup.
+4. Implement Phase 3 hostile-input defenses and GitHub archive fixtures before
+   downloading or extracting any repository content.
+5. Implement deterministic JS/TS evidence persistence before system-map,
+   reusable-asset, current-status, or AI-summary features.
