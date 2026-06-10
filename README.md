@@ -54,25 +54,52 @@ local AI endpoints.
 studio-2/
 ├── app/
 │   ├── api/
+│   │   ├── ai/
+│   │   │   ├── chat/
+│   │   │   │   ├── route.ts        # POST /api/ai/chat — stateless Ollama chat endpoint
+│   │   │   │   └── route.test.ts
+│   │   │   └── health/
+│   │   │       ├── route.ts        # GET /api/ai/health — Ollama reachability probe
+│   │   │       └── route.test.ts
 │   │   └── log/
-│   │       ├── route.ts        # POST /api/log — client-side log ingestion endpoint
+│   │       ├── route.ts            # POST /api/log — client-side log ingestion endpoint
 │   │       └── route.test.ts
-│   ├── layout.tsx              # Root layout — fonts, global styles
-│   └── page.tsx                # Home page (placeholder)
+│   ├── dashboard/
+│   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
+│   │   └── page.tsx                # Dashboard overview page
+│   ├── layout.tsx                  # Root layout — fonts, global styles
+│   └── page.tsx                    # Marketing landing page
 ├── components/
+│   ├── app/
+│   │   ├── app-shell.tsx           # Main app layout (sidebar + header + content area)
+│   │   └── app-sidebar.tsx         # Fixed sidebar with dashboard navigation
+│   ├── marketing/
+│   │   ├── marketing-navbar.tsx    # Public site navbar
+│   │   └── marketing-footer.tsx    # Public site footer
 │   └── ui/
-│       └── button.tsx          # shadcn/ui Button component
+│       └── button.tsx              # shadcn/ui Button component
+├── config/
+│   ├── navigation.ts               # dashboardNavigation — sidebar nav items
+│   └── site.ts                     # siteConfig — name, description, mainNav
 ├── lib/
+│   ├── ai/
+│   │   ├── chat-contract.ts        # Shared message/conversation types
+│   │   ├── context-builder.ts      # Builds token-budgeted message array from context
+│   │   ├── conversation-summary.ts # Conversation summarization helpers
+│   │   ├── model-config.ts         # ModelRequestConfig, env-driven defaults
+│   │   ├── model-policy.ts         # Request validation + allowed model list
+│   │   ├── ollama-client.ts        # chatWithOllama(), getOllamaModels(), OllamaClientError
+│   │   └── token-budget.ts         # Token estimation and budget enforcement
 │   ├── logger/
-│   │   ├── client.ts           # Client-side logger (posts to /api/log)
-│   │   ├── server.ts           # Server-side logger (writes directly to Supabase)
-│   │   ├── sanitize.ts         # Recursive redaction of sensitive keys
-│   │   ├── types.ts            # LogLevel, LogSource, LogInput, StoredLogEntry
-│   │   └── validation.ts       # validateLogInput(), isUuid()
-│   ├── client.ts               # Supabase browser client
-│   ├── server.ts               # Supabase server client (RSC / Server Actions)
-│   ├── middleware.ts           # Supabase session middleware helper
-│   └── utils.ts                # cn() utility (clsx + tailwind-merge)
+│   │   ├── client.ts               # Client-side logger (posts to /api/log)
+│   │   ├── server.ts               # Server-side logger (writes directly to Supabase)
+│   │   ├── sanitize.ts             # Recursive redaction of sensitive keys
+│   │   ├── types.ts                # LogLevel, LogSource, LogInput, StoredLogEntry
+│   │   └── validation.ts           # validateLogInput(), isUuid()
+│   ├── client.ts                   # Supabase browser client
+│   ├── server.ts                   # Supabase server client (RSC / Server Actions)
+│   ├── middleware.ts               # Supabase session middleware helper
+│   └── utils.ts                    # cn() utility (clsx + tailwind-merge)
 ├── supabase/
 │   ├── migrations/
 │   │   └── 20260609000000_create_logs.sql   # public.logs table + RLS + indexes
@@ -80,6 +107,7 @@ studio-2/
 │       └── enable_logs_retention.sql        # pg_cron daily purge (logs > 30d)
 ├── docs/
 │   ├── LOGGING.md              # Logging system usage guide
+│   ├── OLLAMA.md               # Ollama AI integration guide
 │   └── IMPLEMENTATION_LOG.md  # Historical setup log
 ├── public/                     # Static assets
 ├── components.json             # shadcn/ui config
@@ -97,6 +125,8 @@ studio-2/
 - All component aliases route through `@/` (mapped to the project root in `tsconfig.json`).
 - `cn()` from `lib/utils.ts` is the standard utility for conditional Tailwind classes.
 - Use `lib/logger/server.ts` from Route Handlers, Server Actions, and server code. Use `lib/logger/client.ts` from Client Components. See `docs/LOGGING.md` for full usage.
+- AI chat goes through `lib/ai/` modules — never call Ollama directly from a route handler. Use `chatWithOllama()` from `lib/ai/ollama-client.ts` after validating via `lib/ai/model-policy.ts`.
+- Site/nav config lives in `config/` — update `config/navigation.ts` to add dashboard routes, `config/site.ts` for top-level site metadata.
 
 ## Scripts
 
@@ -121,4 +151,4 @@ The goal of this studio is to become a tool developers use when inheriting, reco
 
 See `docs/IMPLEMENTATION_LOG.md` for the full setup history.
 
-> Last auto-updated: 2026-06-09
+> Last auto-updated: 2026-06-10
