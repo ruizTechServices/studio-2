@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" role="img" aria-labelledby="title desc">
+  <title id="title">System map</title>
+  <desc id="desc">Routes, APIs, components, and utilities connected in a system map.</desc>
+  <rect x="1" y="1" width="478" height="298" rx="20" fill="#f8fafc" stroke="#e2e8f0"/>
+  <g fill="none" stroke="#cbd5e1" stroke-width="2"><path d="m90 80 150 70 150-82"/><path d="m90 80 46 150 104-80 112 82 38-164"/><path d="m136 230 216 2"/></g>
+  <g fill="#fff" stroke="#94a3b8" stroke-width="2"><circle cx="90" cy="80" r="24"/><circle cx="240" cy="150" r="34"/><circle cx="390" cy="68" r="22"/><circle cx="136" cy="230" r="22"/><circle cx="352" cy="232" r="26"/></g>
+  <g fill="#2563eb"><circle cx="90" cy="80" r="8"/><circle cx="240" cy="150" r="12"/><circle cx="390" cy="68" r="7"/><circle cx="136" cy="230" r="7"/><circle cx="352" cy="232" r="9"/></g>
+</svg>

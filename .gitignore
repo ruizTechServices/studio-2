@@ -45,3 +45,5 @@ next-env.d.ts
 docs/*
 !docs/LOGGING.md
 !docs/OLLAMA.md
+!docs/IMPLEMENTATION_LOG.md
+!docs/VISUAL-ASSETS.md

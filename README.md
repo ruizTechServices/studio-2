@@ -14,9 +14,25 @@ This is a clean Next.js rebuild of `ruizTechStudio`, starting from a clarified p
 | Styling | Tailwind CSS 4 |
 | Components | shadcn/ui (base-luma style) |
 | Icons | lucide-react |
+| Brand and Illustrations | Project-owned SVG and generated favicon/app-icon assets |
+| Motion | Lightweight CSS/SVG animation components |
 | Data Layer | Supabase (postgres + auth) |
 | Supabase Helpers | `@supabase/supabase-js`, `@supabase/ssr` |
 | Package Manager | npm |
+
+## Current Implementation Status
+
+The deterministic application foundation is complete:
+
+- App Router shell, marketing landing page, and dashboard overview
+- Centralized server/client logging with Supabase persistence support
+- Stateless, token-budgeted Ollama API integration
+- Project-owned logo, favicon, app-icon, and placement-illustration library
+- Reusable accessible animations for scanning, system mapping, asset extraction,
+  project analysis, and subtle dashboard panel motion
+
+The next product milestone is the project intake flow. Project-feature routes
+should remain unimplemented until intake produces a validated normalized result.
 
 ## Getting Started
 
@@ -45,8 +61,8 @@ OLLAMA_CHAT_TIMEOUT_MS=120000
 
 `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never use a `NEXT_PUBLIC_`
 prefix. The Ollama variables are also server-only. See `docs/LOGGING.md` for
-centralized logging setup and usage and `docs/OLLAMA.md` for the stateless
-local AI endpoints.
+centralized logging setup and usage, `docs/OLLAMA.md` for the stateless local AI
+endpoints, and `docs/VISUAL-ASSETS.md` for the brand and animation system.
 
 ## Project Structure
 
@@ -67,12 +83,17 @@ studio-2/
 │   ├── dashboard/
 │   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
 │   │   └── page.tsx                # Dashboard overview page
+│   ├── apple-icon.png              # Next.js Apple touch icon
+│   ├── icon.svg                    # Next.js scalable app icon
 │   ├── layout.tsx                  # Root layout — fonts, global styles
 │   └── page.tsx                    # Marketing landing page
 ├── components/
+│   ├── animations/                 # Accessible repo scan, map, extraction, loader, and ambient motion
 │   ├── app/
 │   │   ├── app-shell.tsx           # Main app layout (sidebar + header + content area)
 │   │   └── app-sidebar.tsx         # Fixed sidebar with dashboard navigation
+│   ├── brand/
+│   │   └── brand-logo.tsx          # Responsive in-product logo mark and wordmark
 │   ├── marketing/
 │   │   ├── marketing-navbar.tsx    # Public site navbar
 │   │   └── marketing-footer.tsx    # Public site footer
@@ -106,10 +127,13 @@ studio-2/
 │   └── sql/
 │       └── enable_logs_retention.sql        # pg_cron daily purge (logs > 30d)
 ├── docs/
+│   ├── IMPLEMENTATION_LOG.md  # Historical implementation record and current milestone updates
 │   ├── LOGGING.md              # Logging system usage guide
 │   ├── OLLAMA.md               # Ollama AI integration guide
-│   └── IMPLEMENTATION_LOG.md  # Historical setup log
-├── public/                     # Static assets
+│   └── VISUAL-ASSETS.md        # Brand, illustration, favicon, and animation inventory
+├── public/
+│   ├── brand/                  # Static logo variants, favicon sources, and app icons
+│   └── illustrations/          # Product-specific placement illustrations
 ├── components.json             # shadcn/ui config
 ├── next.config.ts              # Next.js config
 ├── vitest.config.ts            # Vitest test runner config
@@ -127,6 +151,9 @@ studio-2/
 - Use `lib/logger/server.ts` from Route Handlers, Server Actions, and server code. Use `lib/logger/client.ts` from Client Components. See `docs/LOGGING.md` for full usage.
 - AI chat goes through `lib/ai/` modules — never call Ollama directly from a route handler. Use `chatWithOllama()` from `lib/ai/ollama-client.ts` after validating via `lib/ai/model-policy.ts`.
 - Site/nav config lives in `config/` — update `config/navigation.ts` to add dashboard routes, `config/site.ts` for top-level site metadata.
+- Use `BrandLogo` for in-product branding. Use static light/dark logo variants only when assets leave the application.
+- Reuse animations from `components/animations/`; do not create one-off motion for feature pages. All motion must respect `prefers-reduced-motion`.
+- Meaningful illustrations require useful alt text. Decorative images use empty alt text, and decorative animations must be hidden from assistive technology.
 
 ## Scripts
 
@@ -150,5 +177,6 @@ The goal of this studio is to become a tool developers use when inheriting, reco
 - **System visualization** — interactive graph of architecture and dependencies
 
 See `docs/IMPLEMENTATION_LOG.md` for the full setup history.
+See `docs/VISUAL-ASSETS.md` for the implemented visual foundation and adoption guidance.
 
 > Last auto-updated: 2026-06-10

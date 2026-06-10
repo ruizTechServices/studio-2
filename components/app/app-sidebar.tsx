@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+import { BrandLogo } from '@/components/brand/brand-logo'
 import { dashboardNavigation } from '@/config/navigation'
 import { siteConfig } from '@/config/site'
 import { cn } from '@/lib/utils'
@@ -28,8 +29,8 @@ export function AppSidebar() {
     <aside className="min-w-0 max-w-full border-b bg-sidebar lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:border-r lg:border-b-0">
       <div className="flex h-full min-w-0 flex-col">
         <div className="flex h-16 items-center border-b px-4 lg:px-5">
-          <Link href="/" className="text-sm font-semibold tracking-tight">
-            {siteConfig.name}
+          <Link href="/" aria-label={`${siteConfig.name} home`}>
+            <BrandLogo />
           </Link>
         </div>
         <nav

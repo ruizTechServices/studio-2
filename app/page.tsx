@@ -5,6 +5,7 @@ import {
   History,
   Map,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { MarketingFooter } from '@/components/marketing/marketing-footer'
@@ -74,32 +75,15 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-xl border bg-muted/30 p-4 shadow-sm">
-              <div className="rounded-lg border bg-background">
-                <div className="flex items-center gap-2 border-b px-4 py-3">
-                  <span className="size-2 rounded-full bg-blue-700" />
-                  <span className="text-xs font-medium">Project recovery flow</span>
-                </div>
-                <div className="space-y-1 p-3">
-                  {[
-                    'Connect repository',
-                    'Scan structure and dependencies',
-                    'Build a system map',
-                    'Summarize current status',
-                    'Extract reusable assets',
-                  ].map((step, index) => (
-                    <div
-                      key={step}
-                      className="flex items-center gap-3 rounded-md px-3 py-2.5"
-                    >
-                      <span className="font-mono text-xs text-muted-foreground">
-                        0{index + 1}
-                      </span>
-                      <span className="text-sm">{step}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="overflow-hidden rounded-xl border bg-muted/30 p-3 shadow-sm">
+              <Image
+                src="/illustrations/hero-system-recovery.svg"
+                width={720}
+                height={520}
+                priority
+                alt="Repository files flowing into a connected system map and reusable asset inventory"
+                className="h-auto w-full rounded-lg"
+              />
             </div>
           </div>
         </section>

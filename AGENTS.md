@@ -12,7 +12,7 @@ This is a **codebase intelligence studio** — not a generic SaaS app. The produ
 
 ## Current State (as of 2026-06-10)
 
-Branch: `app-shell`. The v0 app shell is complete and committed. The Ollama AI integration is fully implemented and tested. The marketing landing page is live. Feature work (project intake, system map, etc.) has not started.
+Branch: `app-shell`. The v0 app shell is complete and committed. The Ollama AI integration is fully implemented and tested. The marketing landing page is live. The visual asset foundation is implemented and verified. Feature work (project intake, system map, etc.) has not started.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -23,10 +23,16 @@ Completed since initial scaffold:
 - `app/api/ai/health/route.ts` — GET /api/ai/health — Ollama reachability probe
 - `components/app/app-shell.tsx` + `app-sidebar.tsx` — v0 app shell with fixed sidebar
 - `components/marketing/` — marketing navbar and footer
+- `components/brand/brand-logo.tsx` — responsive in-product logo mark and wordmark
+- `components/animations/` — accessible CSS/SVG animations for scanning, mapping, extraction, analysis loading, and ambient panel motion
 - `app/page.tsx` — marketing landing page
 - `app/dashboard/` — dashboard layout + overview page
+- `app/favicon.ico`, `app/icon.svg`, `app/apple-icon.png` — Next.js metadata icon set
 - `config/navigation.ts` + `config/site.ts` — site and nav configuration
+- `public/brand/` — primary logos, compact marks, favicon sources, and app icon sizes
+- `public/illustrations/` — product-specific placement illustrations for recovery, intake, maps, assets, and status
 - `docs/OLLAMA.md` — Ollama integration guide
+- `docs/VISUAL-ASSETS.md` — visual asset inventory, usage rules, placements, and animation examples
 
 ## Architecture Rules
 
@@ -38,6 +44,7 @@ Completed since initial scaffold:
 - **Logging**: always use `lib/logger/server.ts` on the server, `lib/logger/client.ts` on the client. Never import server logger into Client Components. See `docs/LOGGING.md`.
 - **AI**: never call Ollama directly from route handlers. Use `lib/ai/ollama-client.ts` (`chatWithOllama`, `getOllamaModels`). Validate requests with `lib/ai/model-policy.ts` first. Build the message array with `lib/ai/context-builder.ts`. See `docs/OLLAMA.md`.
 - **Config**: site metadata → `config/site.ts` (`siteConfig`). Dashboard nav items → `config/navigation.ts` (`dashboardNavigation`).
+- **Visual assets**: use `BrandLogo` for in-product branding, static assets from `public/brand/` and `public/illustrations/`, and reusable motion from `components/animations/`. Meaningful images require useful alt text; decorative animations must be hidden from assistive technology. See `docs/VISUAL-ASSETS.md`.
 - **Testing**: Vitest (`npm run test`). Test files co-located with source (`.test.ts`). Coverage via `npm run test:coverage`.
 - **Styling**: Tailwind CSS 4 + shadcn/ui (`base-luma` style). Use `cn()` from `lib/utils.ts` for conditional classes.
 - **Path aliases**: `@/` maps to the project root. UI components at `@/components/ui/`, app shell at `@/components/app/`, utilities at `@/lib/`.
@@ -53,9 +60,11 @@ Completed since initial scaffold:
 
 1. Apply Supabase migration if not yet done: `supabase/migrations/20260609000000_create_logs.sql`.
 2. (Optional) Enable log retention: run `supabase/sql/enable_logs_retention.sql` after confirming `pg_cron` is enabled.
-3. Build the project intake flow (`/dashboard/import`) — file/URL input, initial scan, display of parsed structure.
-4. Define the system model schema (what a "project" is in the DB).
-5. Build the system map view once intake produces real data.
+3. Define the project-intake contract: supported sources, scan states, normalized output, limits, and failure behavior.
+4. Build the project intake flow (`/dashboard/import`) — file/URL input, initial scan, and parsed-structure review. Reuse the existing intake illustration and scan/analysis animations.
+5. Define the persistent system model schema from real intake output, including projects, scans, files, relationships, extracted assets, and work-session context.
+6. Build the system map view only after intake produces validated relationships.
+7. Connect reusable-asset extraction and current-status summaries to persisted scan results.
 
 ## Environment Variables
 

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+import { PanelAmbientMotion } from '@/components/animations'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -50,8 +51,9 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <section className="overflow-hidden rounded-xl border bg-card">
-        <div className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section className="relative isolate overflow-hidden rounded-xl border bg-card">
+        <PanelAmbientMotion />
+        <div className="relative grid gap-6 p-5 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-blue-700">
               <GitBranch className="size-4" aria-hidden="true" />
@@ -73,7 +75,7 @@ export default function DashboardPage() {
             <ArrowRight data-icon="inline-end" />
           </Link>
         </div>
-        <div className="grid border-t bg-muted/30 sm:grid-cols-3">
+        <div className="relative grid border-t bg-muted/30 sm:grid-cols-3">
           {['Connect repository', 'Scan structure', 'Review system model'].map(
             (step, index) => (
               <div
