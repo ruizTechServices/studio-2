@@ -12,7 +12,7 @@ This is a **codebase intelligence studio** — not a generic SaaS app. The produ
 
 ## Current State (as of 2026-06-10)
 
-Branch: `codex/project-intake-foundation`. The v0 app shell, Ollama integration, marketing surface, and visual asset foundation are complete. Phase 1 of project intake is implemented locally; queue processing and deterministic scanning have not started.
+Branch: `app-shell`. The v0 app shell, Ollama integration, marketing surface, and visual asset foundation are complete. Phase 1 of project intake is implemented and operationally verified; queue processing and deterministic scanning have not started.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)

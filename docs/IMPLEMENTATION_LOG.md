@@ -43,8 +43,8 @@ The mission is simple. The execution is not.
 
 ## CURRENT OBJECTIVE
 
-> **Verify the local-only Phase 1 intake foundation, then add durable private
-> queue processing before repository fetching or scanning.**
+> **Add durable private queue processing before repository fetching or
+> scanning.**
 
 The deterministic foundation is complete: app shell, marketing surface,
 logging, stateless Ollama integration, and the visual asset system. The next
@@ -55,7 +55,7 @@ automation before the intake contract is stable.
 
 ## CURRENT MILESTONE SNAPSHOT — 2026-06-10
 
-Branch: `codex/project-intake-foundation`
+Branch: `app-shell`
 
 Completed:
 
@@ -444,7 +444,7 @@ Browser DOM check     passed: homepage and dashboard, no console errors/warnings
 The intake contract is the gating decision. Building downstream pages before
 that contract exists would create speculative schemas and misleading UI.
 
-Current implementation branch: `codex/project-intake-foundation`
+Current implementation branch: `app-shell`
 
 ---
 
@@ -470,7 +470,6 @@ Current implementation branch: `codex/project-intake-foundation`
 - Queue, worker, repository fetching, archive handling, source parsing,
   deterministic findings, Ollama summaries, production authorization, and
   downstream project views.
-- Applying the migration to a live Supabase project.
 
 ### Verification
 
