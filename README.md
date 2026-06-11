@@ -106,7 +106,7 @@ studio-2/
 │   │       └── route.test.ts
 │   ├── dashboard/
 │   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
-│   │   ├── import/page.tsx          # Local-only public GitHub intake surface
+│   │   ├── import/page.tsx         # Local-only public GitHub intake surface
 │   │   └── page.tsx                # Dashboard overview page
 │   ├── apple-icon.png              # Next.js Apple touch icon
 │   ├── icon.svg                    # Next.js scalable app icon
@@ -144,34 +144,48 @@ studio-2/
 │   │   ├── sanitize.ts             # Recursive redaction of sensitive keys
 │   │   ├── types.ts                # LogLevel, LogSource, LogInput, StoredLogEntry
 │   │   └── validation.ts           # validateLogInput(), isUuid()
-│   ├── intake/                      # Intake contracts, validation, persistence, and private worker foundation
+│   ├── intake/
+│   │   ├── contracts.ts            # Shared intake types and result shapes
+│   │   ├── github-url.ts           # Strict public GitHub URL and ref validation
+│   │   ├── http.ts                 # Fetch helpers for intake HTTP requests
+│   │   ├── policy.ts               # Intake policy limits (URL length, ref format, etc.)
+│   │   ├── repository.ts           # Supabase persistence helpers for projects/scans
+│   │   ├── validation.ts           # Top-level intake input validation
+│   │   └── worker/                 # Phase 2 private single-concurrency scan worker
+│   │       ├── config.ts           # Worker env config (lease, retry, poll intervals)
+│   │       ├── contracts.ts        # Worker-internal types (claims, events, outcomes)
+│   │       ├── failures.ts         # Safe terminal failure recording
+│   │       ├── repository.ts       # Worker Supabase RPC wrappers (claim, heartbeat, complete)
+│   │       └── runner.ts           # Main worker loop (process-once and continuous modes)
 │   ├── client.ts                   # Supabase browser client
 │   ├── server.ts                   # Supabase server client (RSC / Server Actions)
 │   ├── middleware.ts               # Supabase session middleware helper
 │   └── utils.ts                    # cn() utility (clsx + tailwind-merge)
+├── scripts/
+│   └── intake-worker.ts            # CLI entry point — runs worker:intake and worker:intake:once
 ├── supabase/
 │   ├── migrations/
-│   │   ├── 20260609000000_create_logs.sql   # public.logs table + RLS + indexes
-│   │   ├── 20260610214115_create_project_intake_foundation.sql
-│   │   ├── 20260610233821_restrict_phase_1_service_role_grants.sql
-│   │   └── 20260611000000_create_scan_worker_foundation.sql
+│   │   ├── 20260609000000_create_logs.sql                          # public.logs table + RLS + indexes
+│   │   ├── 20260610214115_create_project_intake_foundation.sql     # projects/scans schema + service-role RPC
+│   │   ├── 20260610233821_restrict_phase_1_service_role_grants.sql # minimum Phase 1 service-role privileges
+│   │   └── 20260611000000_create_scan_worker_foundation.sql        # scan_events, claims, heartbeats, retries
 │   └── sql/
-│       └── enable_logs_retention.sql        # pg_cron daily purge (logs > 30d)
+│       └── enable_logs_retention.sql                               # pg_cron daily purge (logs > 30d)
 ├── docs/
 │   ├── IMPLEMENTATION_LOG.md  # Historical implementation record and current milestone updates
-│   ├── INTAKE-WORKER.md        # Phase 2 worker operations and safety contract
-│   ├── LOGGING.md              # Logging system usage guide
-│   ├── OLLAMA.md               # Ollama AI integration guide
-│   ├── PROJECT-INTAKE.md       # Phase 1 and 2 intake contract, policy, and phased plan
-│   └── VISUAL-ASSETS.md        # Brand, illustration, favicon, and animation inventory
+│   ├── INTAKE-WORKER.md       # Phase 2 worker operations and safety contract
+│   ├── LOGGING.md             # Logging system usage guide
+│   ├── OLLAMA.md              # Ollama AI integration guide
+│   ├── PROJECT-INTAKE.md      # Phase 1 and 2 intake contract, policy, and phased plan
+│   └── VISUAL-ASSETS.md       # Brand, illustration, favicon, and animation inventory
 ├── public/
-│   ├── brand/                  # Static logo variants, favicon sources, and app icons
-│   └── illustrations/          # Product-specific placement illustrations
-├── components.json             # shadcn/ui config
-├── next.config.ts              # Next.js config
-├── vitest.config.ts            # Vitest test runner config
-├── tsconfig.json               # TypeScript config
-└── AGENTS.md                   # AI agent rules for this repo
+│   ├── brand/                 # Static logo variants, favicon sources, and app icons
+│   └── illustrations/         # Product-specific placement illustrations
+├── components.json            # shadcn/ui config
+├── next.config.ts             # Next.js config
+├── vitest.config.ts           # Vitest test runner config
+├── tsconfig.json              # TypeScript config
+└── AGENTS.md                  # AI agent rules for this repo
 ```
 
 ## Key Conventions
@@ -191,13 +205,13 @@ studio-2/
 ## Scripts
 
 ```bash
-npm run dev           # Start dev server
-npm run build         # Production build
-npm run start         # Start production server
-npm run lint          # ESLint
-npm run test          # Vitest (run once)
-npm run test:watch    # Vitest watch mode
-npm run test:coverage # Vitest with coverage report
+npm run dev                # Start dev server
+npm run build              # Production build
+npm run start              # Start production server
+npm run lint               # ESLint
+npm run test               # Vitest (run once)
+npm run test:watch         # Vitest watch mode
+npm run test:coverage      # Vitest with coverage report
 npm run worker:intake:once # Process at most one eligible scan
 npm run worker:intake      # Poll the private scan queue continuously
 ```
