@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-labelledby="title desc">
+  <title id="title">Codebase recovery system map</title>
+  <desc id="desc">Repository files flow into a connected system map and reusable asset inventory.</desc>
+  <rect x="1" y="1" width="718" height="518" rx="24" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="42" y="48" width="220" height="424" rx="16" fill="#fff" stroke="#cbd5e1"/>
+  <circle cx="66" cy="74" r="5" fill="#2563eb"/>
+  <path d="M82 74h86" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+  <g fill="#f8fafc" stroke="#e2e8f0">
+    <rect x="62" y="108" width="180" height="54" rx="8"/>
+    <rect x="62" y="174" width="180" height="54" rx="8"/>
+    <rect x="62" y="240" width="180" height="54" rx="8"/>
+    <rect x="62" y="306" width="180" height="54" rx="8"/>
+    <rect x="62" y="372" width="180" height="54" rx="8"/>
+  </g>
+  <g fill="#2563eb">
+    <circle cx="84" cy="135" r="5"/><circle cx="84" cy="201" r="5"/><circle cx="84" cy="267" r="5"/><circle cx="84" cy="333" r="5"/><circle cx="84" cy="399" r="5"/>
+  </g>
+  <g stroke="#94a3b8" stroke-width="6" stroke-linecap="round">
+    <path d="M100 135h96"/><path d="M100 201h76"/><path d="M100 267h108"/><path d="M100 333h88"/><path d="M100 399h100"/>
+  </g>
+  <g fill="none" stroke="#cbd5e1" stroke-width="2">
+    <path d="m306 124 142 80 158-104"/><path d="m306 124 46 250 96-170 128 178 30-282"/><path d="m352 374 224 8"/>
+  </g>
+  <g fill="#fff" stroke="#94a3b8" stroke-width="2">
+    <circle cx="306" cy="124" r="22"/><circle cx="448" cy="204" r="32"/><circle cx="606" cy="100" r="20"/><circle cx="352" cy="374" r="20"/><circle cx="576" cy="382" r="25"/>
+  </g>
+  <g fill="#2563eb">
+    <circle cx="306" cy="124" r="8"/><circle cx="448" cy="204" r="12"/><circle cx="606" cy="100" r="7"/><circle cx="352" cy="374" r="7"/><circle cx="576" cy="382" r="9"/>
+  </g>
+  <path d="M286 444h364" stroke="#e2e8f0" stroke-width="1"/>
+  <g fill="#fff" stroke="#cbd5e1">
+    <rect x="310" y="424" width="92" height="38" rx="8"/><rect x="420" y="424" width="92" height="38" rx="8"/><rect x="530" y="424" width="92" height="38" rx="8"/>
+  </g>
+  <g fill="#2563eb">
+    <rect x="326" y="440" width="28" height="6" rx="3"/><rect x="436" y="440" width="28" height="6" rx="3"/><rect x="546" y="440" width="28" height="6" rx="3"/>
+  </g>
+</svg>

@@ -1,0 +1,207 @@
+.scanLine {
+  position: absolute;
+  inset-inline: 0.75rem;
+  top: 0.75rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #2563eb, transparent);
+  animation: scan 3.6s ease-in-out infinite;
+}
+
+.scanResult {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: #2563eb;
+  opacity: 0.2;
+  animation: result 3.6s ease-in-out infinite;
+}
+
+.mapPath,
+.mapPathAlt {
+  stroke-dasharray: 8 7;
+  animation: trace 5s linear infinite;
+}
+
+.mapPathAlt {
+  animation-direction: reverse;
+}
+
+.mapNode {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: node 3.2s ease-in-out infinite;
+}
+
+.extractor {
+  box-shadow: 0 0 12px color-mix(in oklab, #2563eb 42%, transparent);
+  animation: extractor 2.8s ease-in-out infinite;
+}
+
+.extractedAsset {
+  animation: extracted 3.6s ease-in-out infinite;
+}
+
+.analysisDot {
+  animation: dot 1.4s ease-in-out infinite;
+}
+
+.ambientLine {
+  animation: ambient 8s ease-in-out infinite;
+}
+
+.ambientLineReverse {
+  animation: ambient-reverse 10s ease-in-out infinite;
+}
+
+.delay1 {
+  animation-delay: -0.35s;
+}
+
+.delay2 {
+  animation-delay: -0.7s;
+}
+
+.delay3 {
+  animation-delay: -1.05s;
+}
+
+.delay4 {
+  animation-delay: -1.4s;
+}
+
+@keyframes scan {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(10.75rem);
+  }
+}
+
+@keyframes result {
+  0%,
+  35% {
+    opacity: 0.15;
+    transform: scale(0.75);
+  }
+  55%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes trace {
+  to {
+    stroke-dashoffset: -60;
+  }
+}
+
+@keyframes node {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes extractor {
+  0%,
+  100% {
+    transform: translateX(-2px);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateX(2px);
+    opacity: 1;
+  }
+}
+
+@keyframes extracted {
+  0%,
+  25% {
+    transform: translateX(-8px);
+    opacity: 0.25;
+  }
+  55%,
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes dot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-2px);
+    opacity: 1;
+  }
+}
+
+@keyframes ambient {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(14rem);
+    opacity: 1;
+  }
+}
+
+@keyframes ambient-reverse {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(-12rem);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanLine,
+  .scanResult,
+  .mapPath,
+  .mapPathAlt,
+  .mapNode,
+  .extractor,
+  .extractedAsset,
+  .analysisDot,
+  .ambientLine,
+  .ambientLineReverse {
+    animation: none;
+  }
+
+  .scanLine,
+  .ambientLine,
+  .ambientLineReverse {
+    display: none;
+  }
+
+  .scanResult,
+  .mapNode,
+  .extractor,
+  .extractedAsset,
+  .analysisDot {
+    opacity: 1;
+    transform: none;
+  }
+}
