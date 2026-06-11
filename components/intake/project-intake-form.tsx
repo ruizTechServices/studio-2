@@ -365,8 +365,7 @@ export function ProjectIntakeForm() {
           <div>
             <h2 className="text-sm font-semibold">Scan status</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Queued scans remain waiting until the Phase 2 private worker is
-              implemented.
+              Queued scans are processed by the private Phase 2 worker. Source fetching and repository analysis begin in Phase 3.
             </p>
           </div>
           {scan ? (
