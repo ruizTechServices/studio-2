@@ -43,19 +43,19 @@ The mission is simple. The execution is not.
 
 ## CURRENT OBJECTIVE
 
-> **Add durable private queue processing before repository fetching or
-> scanning.**
+> **Build Phase 3 hostile-input defenses and bounded GitHub archive intake.**
 
 The deterministic foundation is complete: app shell, marketing surface,
-logging, stateless Ollama integration, and the visual asset system. The next
-work must turn an imported repository into a validated normalized result.
+logging, stateless Ollama integration, visual assets, local intake, and private
+queue/worker mechanics. The next work must safely acquire a bounded public
+GitHub archive without persisting source content.
 
 Do not build authentication flows, speculative system-map pages, or agentic
 automation before the intake contract is stable.
 
-## CURRENT MILESTONE SNAPSHOT — 2026-06-10
+## CURRENT MILESTONE SNAPSHOT — 2026-06-11
 
-Branch: `app-shell`
+Branch: `main`
 
 Completed:
 
@@ -79,6 +79,13 @@ Completed:
   - Gated project import and scan-status APIs
   - `/dashboard/import` form, queued status, and two-second status polling
   - Phase 1 tests and `docs/PROJECT-INTAKE.md`
+- Private Phase 2 worker foundation:
+  - `public.scans` queue claims with row locking and leases
+  - Durable `public.scan_events` lifecycle history
+  - Heartbeats, retries, safe terminal failures, and future completion RPC
+  - Manually-run single-concurrency Node worker
+  - Metadata-only placeholder ending with `phase_3_not_implemented`
+  - Worker unit tests and `docs/INTAKE-WORKER.md`
 
 Verified:
 
@@ -90,7 +97,6 @@ Verified:
 
 Not started:
 
-- Private Supabase Queue and scan worker
 - Repository fetching, safe archive extraction, and deterministic scanning
 - Persistent scan evidence beyond projects and scan runs
 - System map, reusable-assets, and work-session feature surfaces
@@ -444,7 +450,7 @@ Browser DOM check     passed: homepage and dashboard, no console errors/warnings
 The intake contract is the gating decision. Building downstream pages before
 that contract exists would create speculative schemas and misleading UI.
 
-Current implementation branch: `app-shell`
+Current implementation branch: `main`
 
 ---
 
@@ -501,3 +507,53 @@ advisors, performance advisors, and schema lint report no issues.
    downloading or extracting any repository content.
 4. Implement deterministic JS/TS evidence persistence before system-map,
    reusable-asset, current-status, or AI-summary features.
+
+---
+
+## PROJECT INTAKE PHASE 2 — 2026-06-11
+
+### Implemented
+
+- Added `public.scan_events`, retry scheduling, heartbeat tracking, queue
+  indexes, and minimum service-role grants.
+- Added service-role-only RPCs for atomic claims, lease extension, retry
+  release, terminal failure, and future completion.
+- Claims use `FOR UPDATE SKIP LOCKED`, increment attempts, and recover expired
+  leases without double claims.
+- Added modular worker configuration, contracts, safe failure classification,
+  typed persistence wrappers, and runner behavior under `lib/intake/worker/`.
+- Added `scripts/intake-worker.ts` with process-once, continuous polling,
+  graceful SIGINT/SIGTERM handling, and fixed single concurrency.
+- Added `tsx` as a development dependency for the manual TypeScript worker.
+- Added deterministic worker unit tests with mocked Supabase persistence.
+
+### Intentional Boundary
+
+The Phase 2 processor validates scan metadata only and then records
+`phase_3_not_implemented` as a safe terminal failure. It does not fetch GitHub,
+download or extract archives, parse files, persist source, or call Ollama.
+
+### Verification
+
+```text
+npm run lint          passed
+npx tsc --noEmit      passed
+npm run test          passed: 24 files, 191 tests
+npm run test:coverage passed: 91.46% statements, 85.89% branches
+npm run build         passed
+git diff --check      passed
+```
+
+The Supabase CLI is available, but linked migration/status/lint checks returned
+403 because the current account lacks the required project privileges and
+`SUPABASE_DB_PASSWORD` is not configured. The local Supabase stack is also
+unavailable because Docker Desktop is not running. The Phase 2 migration has
+not been pushed.
+
+### Next Delivery Sequence
+
+1. Apply the Phase 2 migration and run Supabase security/performance advisors.
+2. Build hostile-input fixtures and bounded GitHub archive intake.
+3. Add deterministic JS/TS evidence only after archive safety is verified.
+
+> Last auto-updated: 2026-06-11

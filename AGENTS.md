@@ -10,9 +10,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This is a **codebase intelligence studio** — not a generic SaaS app. The product goal is project recovery, system visualization, reusable asset extraction, and work-session continuity.
 
-## Current State (as of 2026-06-10)
+## Current State (as of 2026-06-11)
 
-Branch: `app-shell`. The v0 app shell, Ollama integration, marketing surface, and visual asset foundation are complete. Phase 1 of project intake is implemented and operationally verified; queue processing and deterministic scanning have not started.
+Branch: `main`. The v0 app shell, Ollama integration, marketing surface, visual asset foundation, and Phase 2 private intake worker foundation are complete. Repository fetching and deterministic scanning have not started.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -40,6 +40,9 @@ Completed since initial scaffold:
 - `supabase/migrations/20260610214115_create_project_intake_foundation.sql` — projects/scans schema and service-role-only transactional RPC
 - `supabase/migrations/20260610233821_restrict_phase_1_service_role_grants.sql` — minimum Phase 1 service-role table privileges
 - `docs/PROJECT-INTAKE.md` — intake contract, security policy, limits, phased plan, and operational status
+- `lib/intake/worker/` + `scripts/intake-worker.ts` — private single-concurrency worker with claims, leases, retries, safe failures, and a Phase 3 placeholder boundary
+- `supabase/migrations/20260611000000_create_scan_worker_foundation.sql` — durable scan events, retry scheduling, heartbeats, and service-role-only worker RPCs
+- `docs/INTAKE-WORKER.md` — Phase 2 worker operations and safety contract
 
 ## Architecture Rules
 
@@ -62,16 +65,15 @@ Completed since initial scaffold:
 
 - Do not add authentication pages or auth flows — the system model must be defined first.
 - Do not build downstream project-feature pages until intake produces validated, persisted scan evidence.
-- Do not add queues, workers, repository fetching, archive extraction, parsers, or AI summaries to Phase 1.
+- Do not add repository fetching, archive extraction, parsers, or AI summaries to the Phase 2 worker foundation.
 - Do not expand the AI layer into agent/agentic patterns before the project intake surface is stable.
 
 ## Next Steps (in order)
 
 1. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
 2. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
-3. Build Phase 2 private queue and single-concurrency worker with leases, retries, events, and cleanup.
-4. Build bounded GitHub archive intake and hostile-input fixtures.
-5. Add deterministic JS/TS scanning before system-map, reusable-asset, status-summary, or AI-summary work.
+3. Build Phase 3 bounded GitHub archive intake and hostile-input fixtures.
+4. Add deterministic JS/TS scanning before system-map, reusable-asset, status-summary, or AI-summary work.
 
 ## Environment Variables
 
@@ -82,6 +84,11 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=        # server-only, never prefix with NEXT_PUBLIC_
 PROJECT_INTAKE_ENABLED=true       # local/dev only; production intake always returns 404
+SCAN_WORKER_ID=                   # optional stable worker ID
+SCAN_WORKER_LEASE_SECONDS=120
+SCAN_WORKER_MAX_ATTEMPTS=3
+SCAN_WORKER_POLL_MS=5000
+SCAN_WORKER_RETRY_DELAY_SECONDS=60
 OLLAMA_GPU_BASE_URL=              # e.g. http://100.86.175.53:11435
 OLLAMA_DEFAULT_MODEL=             # e.g. qwen2.5:7b-instruct-q4_K_M
 OLLAMA_NUM_CTX=4096
@@ -90,4 +97,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-10
+> Last auto-updated: 2026-06-11

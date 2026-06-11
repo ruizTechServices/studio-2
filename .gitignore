@@ -49,6 +49,7 @@ docs/*
 !docs/LOGGING.md
 !docs/OLLAMA.md
 !docs/IMPLEMENTATION_LOG.md
+!docs/INTAKE-WORKER.md
 !docs/PROJECT-INTAKE.md
 !docs/VISUAL-ASSETS.md
 

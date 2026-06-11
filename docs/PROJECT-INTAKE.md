@@ -1,43 +1,55 @@
 # Project Intake
 
-Project intake is the first real ruizTechStudio feature. It establishes durable,
-versioned scan identity before repository fetching, parsing, system mapping, or
-AI summaries are introduced.
+Project intake establishes durable, versioned scan identity and safe processing
+boundaries before repository fetching, parsing, system mapping, or AI summaries
+are introduced.
 
-## Phase 1 Status
+## Current Status
 
-Phase 1 is implemented as a local-development-only intake skeleton:
+Phase 1 intake and Phase 2 private queue/worker mechanics are implemented:
 
 - `/dashboard/import` validates an exact public GitHub repository URL and an
   optional explicit ref.
 - `POST /api/projects/import` atomically upserts a project and creates an
   immutable queued scan through a service-role-only database function.
-- `GET /api/scans/[scanId]` returns a safe scan status shape.
-- Both intake routes return `404` unless `PROJECT_INTAKE_ENABLED=true`.
-- Both intake routes always return `404` in production until authorization
-  exists.
-- No submitted URL is fetched. No source code, credentials, tokens, archives,
-  detected secrets, or AI prompt source text are persisted or logged.
+- `GET /api/scans/[scanId]` returns the existing safe scan status shape.
+- Both intake routes remain local-only and production-hidden.
+- `public.scans` is the private queue source.
+- Service-role-only RPCs claim scans, extend leases, schedule retries, mark
+  safe terminal failures, and support future completion.
+- `public.scan_events` stores immutable claim, heartbeat, retry, failure, and
+  completion history.
+- The manually-run Node worker preserves single concurrency and supports
+  process-once and continuous polling modes.
 
-Queued scans intentionally remain queued until the private Phase 2 worker is
-implemented.
+The Phase 2 processor validates metadata only, then marks the scan failed with
+`phase_3_not_implemented`. It does not pretend a repository scan completed.
+
+## Safety Boundary
+
+No submitted URL is fetched. No repository archive is downloaded or extracted.
+No source file is parsed. No source code, credentials, tokens, archives,
+detected secrets, environment values, private URLs, or AI prompt source text
+are persisted or logged.
+
+Worker controls and `scan_events` are not exposed through browser APIs.
 
 ## Local Configuration
 
-Add this server-side flag to `.env.local`:
-
 ```env
 PROJECT_INTAKE_ENABLED=true
-```
-
-The existing Supabase server variables are also required:
-
-```env
 NEXT_PUBLIC_SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
+
+SCAN_WORKER_ID=
+SCAN_WORKER_LEASE_SECONDS=120
+SCAN_WORKER_MAX_ATTEMPTS=3
+SCAN_WORKER_POLL_MS=5000
+SCAN_WORKER_RETRY_DELAY_SECONDS=60
 ```
 
-Never expose the service-role key through a `NEXT_PUBLIC_` variable.
+Never expose the service-role key through a `NEXT_PUBLIC_` variable. See
+`docs/INTAKE-WORKER.md` for worker ranges, commands, and lifecycle details.
 
 ## API Contract
 
@@ -69,30 +81,39 @@ credentials, ports, non-GitHub hosts, and non-HTTPS protocols are rejected.
 ### `GET /api/scans/[scanId]`
 
 Returns the scan ID, project ID, lifecycle status, statistics, warnings, safe
-error, and summary status. It never returns infrastructure errors or source
-content.
+error, and summary status. The Phase 1 response contract remains unchanged.
 
-## Phase 1 Database Model
+## Database Model
 
-Migration:
+Migrations:
 
-`supabase/migrations/20260610214115_create_project_intake_foundation.sql`
+- `supabase/migrations/20260610214115_create_project_intake_foundation.sql`
+- `supabase/migrations/20260610233821_restrict_phase_1_service_role_grants.sql`
+- `supabase/migrations/20260611000000_create_scan_worker_foundation.sql`
 
-- `public.projects` stores normalized public GitHub repository identity.
-- `public.scans` stores immutable scan identity, requested source ref, lifecycle
-  state, future worker lease fields, policy-limit snapshot, safe results, and
-  timestamps.
-- `public.create_project_scan(...)` performs the project upsert and queued-scan
-  insert in one transaction.
-- RLS is enabled on both tables.
-- Public, anon, and authenticated access is revoked.
-- Only `service_role` receives the minimum Phase 1 table and function grants.
+`public.projects` stores normalized public GitHub repository identity.
+`public.scans` stores immutable scan identity, queue status, attempts, retry
+schedule, lease health, policy limits, safe results, and timestamps.
+`public.scan_events` stores durable worker lifecycle history.
 
-The authoritative Supabase project `lyclwqvmbhiwlxffcnbw` is linked and the
-Phase 1 migrations are applied. A follow-up migration explicitly narrows
-`service_role` table privileges because Supabase default privileges initially
-granted broader access than Phase 1 requires. Remote security advisors,
-performance advisors, and schema lint report no issues.
+RLS is enabled on all three tables. Public, anon, and authenticated access is
+revoked. Worker RPCs use row ownership checks and are executable only by
+`service_role`. Claims use `FOR UPDATE SKIP LOCKED` to prevent double claims.
+
+## Status And Event Flow
+
+An imported scan begins as `queued` and emits `queued`. A worker claim changes
+it to `validating`, increments `attempt_count`, creates a lease, and emits
+`claimed`. Heartbeats extend an owned lease and emit `heartbeat`.
+
+Retryable failures with attempts remaining return to `queued`, set
+`next_attempt_at`, and emit `retry_scheduled`. Non-retryable or exhausted work
+becomes `failed` with safe error fields and emits `failed`. Future real
+processors may use `completed` or `completed_with_warnings` through the
+completion RPC.
+
+The Phase 2 placeholder always ends as `failed` with
+`phase_3_not_implemented`.
 
 ## Intake Policy Limits
 
@@ -112,29 +133,33 @@ performance advisors, and schema lint report no issues.
 These limits are persisted with every scan so future processing remains
 explainable and reproducible.
 
+## Worker Commands
+
+```bash
+npm run worker:intake:once
+npm run worker:intake
+```
+
+The worker never starts automatically with `npm run dev` and handles SIGINT and
+SIGTERM after the current single item finishes.
+
 ## Deferred Phases
 
-1. **Queue and worker:** private Supabase Queue, one-message worker claims,
-   leases, attempts, retries, durable events, and cleanup.
-2. **Safe GitHub archive intake:** internally constructed GitHub URLs, redirect
-   allowlisting, bounded download/extraction, hostile archive defenses, and file
-   inventory without source persistence.
-3. **JavaScript and TypeScript scanner:** deterministic TypeScript compiler API
+1. **Phase 3 safe GitHub archive intake:** hostile-input fixtures, internally
+   constructed GitHub URLs, redirect allowlisting, bounded download/extraction,
+   archive defenses, and file inventory without source persistence.
+2. **JavaScript and TypeScript scanner:** deterministic TypeScript compiler API
    evidence for files, imports, exports, declarations, routes, APIs, and local
    relationships.
-4. **Ollama summary:** factual summary generated only from persisted,
+3. **Ollama summary:** factual summary generated only from persisted,
    deterministic findings.
-5. **Python and Go adapters:** parser adapters added only after JS/TS scanning is
-   stable.
+4. **Python and Go adapters:** parser adapters added only after JS/TS scanning
+   is stable.
 
-## Operational Next Steps
+## Operations
 
-1. Keep local and remote migration history aligned through the Supabase CLI.
-2. Run Supabase security and performance advisors after every schema change.
-3. Add `PROJECT_INTAKE_ENABLED=true` to `.env.local` when exercising intake
-   locally. Production intake remains hidden regardless of this value.
-4. Begin Phase 2 only after its queue and worker security contract is reviewed.
+Keep local and remote migration history aligned through the Supabase CLI and
+run security/performance advisors after every schema change. Live Supabase and
+GitHub network smoke tests remain outside normal PR CI.
 
-Live Supabase and GitHub network smoke tests should remain outside normal PR CI.
-Normal CI should run lint, strict TypeScript, unit tests, and the production
-build.
+> Last auto-updated: 2026-06-11

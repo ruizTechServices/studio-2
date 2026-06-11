@@ -22,8 +22,8 @@ This is a clean Next.js rebuild of `ruizTechStudio`, starting from a clarified p
 
 ## Current Implementation Status
 
-The deterministic application foundation and local-only Phase 1 intake
-skeleton are complete:
+The deterministic application foundation, local-only Phase 1 intake, and
+private Phase 2 queue/worker foundation are complete:
 
 - App Router shell, marketing landing page, and dashboard overview
 - Centralized server/client logging with Supabase persistence support
@@ -35,10 +35,14 @@ skeleton are complete:
 - Local-only `/dashboard/import` workflow with durable queued scan creation and
   safe scan-status polling
 - Supabase `projects` and `scans` migration with RLS and service-role-only access
+- Durable `scan_events`, atomic claims, leases, heartbeats, retries, and safe
+  terminal failure handling
+- Manually-run single-concurrency intake worker with process-once and
+  continuous polling modes
 
-The next product milestone is the private queue and worker. Downstream
-project-feature routes should remain unimplemented until intake produces a
-validated normalized result.
+The worker intentionally stops with `phase_3_not_implemented`; it does not
+fetch or scan repositories. The next product milestone is bounded GitHub
+archive intake with hostile-input defenses.
 
 ## Getting Started
 
@@ -58,6 +62,11 @@ NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
 PROJECT_INTAKE_ENABLED=true
+SCAN_WORKER_ID=
+SCAN_WORKER_LEASE_SECONDS=120
+SCAN_WORKER_MAX_ATTEMPTS=3
+SCAN_WORKER_POLL_MS=5000
+SCAN_WORKER_RETRY_DELAY_SECONDS=60
 OLLAMA_GPU_BASE_URL=http://100.86.175.53:11435
 OLLAMA_DEFAULT_MODEL=qwen2.5:7b-instruct-q4_K_M
 OLLAMA_NUM_CTX=4096
@@ -69,8 +78,9 @@ OLLAMA_CHAT_TIMEOUT_MS=120000
 `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never use a `NEXT_PUBLIC_`
 prefix. The Ollama variables are also server-only. See `docs/LOGGING.md` for
 centralized logging setup and usage, `docs/OLLAMA.md` for the stateless local AI
-endpoints, `docs/PROJECT-INTAKE.md` for the local-only intake contract, and
-`docs/VISUAL-ASSETS.md` for the brand and animation system.
+endpoints, `docs/PROJECT-INTAKE.md` for the intake contract,
+`docs/INTAKE-WORKER.md` for worker operations, and `docs/VISUAL-ASSETS.md` for
+the brand and animation system.
 
 ## Project Structure
 
@@ -126,7 +136,7 @@ studio-2/
 │   │   ├── sanitize.ts             # Recursive redaction of sensitive keys
 │   │   ├── types.ts                # LogLevel, LogSource, LogInput, StoredLogEntry
 │   │   └── validation.ts           # validateLogInput(), isUuid()
-│   ├── intake/                      # Intake contracts, policy, validation, persistence, and URL builders
+│   ├── intake/                      # Intake contracts, validation, persistence, and private worker foundation
 │   ├── client.ts                   # Supabase browser client
 │   ├── server.ts                   # Supabase server client (RSC / Server Actions)
 │   ├── middleware.ts               # Supabase session middleware helper
@@ -135,14 +145,16 @@ studio-2/
 │   ├── migrations/
 │   │   ├── 20260609000000_create_logs.sql   # public.logs table + RLS + indexes
 │   │   ├── 20260610214115_create_project_intake_foundation.sql
-│   │   └── 20260610233821_restrict_phase_1_service_role_grants.sql
+│   │   ├── 20260610233821_restrict_phase_1_service_role_grants.sql
+│   │   └── 20260611000000_create_scan_worker_foundation.sql
 │   └── sql/
 │       └── enable_logs_retention.sql        # pg_cron daily purge (logs > 30d)
 ├── docs/
 │   ├── IMPLEMENTATION_LOG.md  # Historical implementation record and current milestone updates
+│   ├── INTAKE-WORKER.md        # Phase 2 worker operations and safety contract
 │   ├── LOGGING.md              # Logging system usage guide
 │   ├── OLLAMA.md               # Ollama AI integration guide
-│   ├── PROJECT-INTAKE.md       # Phase 1 intake contract, policy, and phased plan
+│   ├── PROJECT-INTAKE.md       # Phase 1 and 2 intake contract, policy, and phased plan
 │   └── VISUAL-ASSETS.md        # Brand, illustration, favicon, and animation inventory
 ├── public/
 │   ├── brand/                  # Static logo variants, favicon sources, and app icons
@@ -178,6 +190,8 @@ npm run lint          # ESLint
 npm run test          # Vitest (run once)
 npm run test:watch    # Vitest watch mode
 npm run test:coverage # Vitest with coverage report
+npm run worker:intake:once # Process at most one eligible scan
+npm run worker:intake      # Poll the private scan queue continuously
 ```
 
 ## Product Direction
@@ -193,4 +207,4 @@ See `docs/IMPLEMENTATION_LOG.md` for the full setup history.
 See `docs/PROJECT-INTAKE.md` for the project intake contract and phased plan.
 See `docs/VISUAL-ASSETS.md` for the implemented visual foundation and adoption guidance.
 
-> Last auto-updated: 2026-06-10
+> Last auto-updated: 2026-06-11

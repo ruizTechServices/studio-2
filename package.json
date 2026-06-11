@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "worker:intake": "tsx scripts/intake-worker.ts",
+    "worker:intake:once": "tsx scripts/intake-worker.ts --once"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -35,6 +37,7 @@
     "eslint-config-next": "16.2.7",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5",
     "vitest": "^4.1.8"
   }
