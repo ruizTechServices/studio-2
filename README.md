@@ -95,8 +95,14 @@ studio-2/
 │   │   │   └── health/
 │   │   │       ├── route.ts        # GET /api/ai/health — Ollama reachability probe
 │   │   │       └── route.test.ts
-│   │   └── log/
-│   │       ├── route.ts            # POST /api/log — client-side log ingestion endpoint
+│   │   ├── log/
+│   │   │   ├── route.ts            # POST /api/log — client-side log ingestion endpoint
+│   │   │   └── route.test.ts
+│   │   ├── projects/import/
+│   │   │   ├── route.ts            # POST /api/projects/import — local-only queued scan creation
+│   │   │   └── route.test.ts
+│   │   └── scans/[scanId]/
+│   │       ├── route.ts            # GET /api/scans/[scanId] — local-only safe scan status
 │   │       └── route.test.ts
 │   ├── dashboard/
 │   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
@@ -113,6 +119,8 @@ studio-2/
 │   │   └── app-sidebar.tsx         # Fixed sidebar with dashboard navigation
 │   ├── brand/
 │   │   └── brand-logo.tsx          # Responsive in-product logo mark and wordmark
+│   ├── intake/
+│   │   └── project-intake-form.tsx # Phase 1 GitHub intake form (URL + ref input)
 │   ├── marketing/
 │   │   ├── marketing-navbar.tsx    # Public site navbar
 │   │   └── marketing-footer.tsx    # Public site footer
