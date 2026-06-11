@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" role="img" aria-labelledby="title desc">
+  <title id="title">Current project status summary</title>
+  <desc id="desc">A project status summary with completed work, open questions, and next action.</desc>
+  <rect x="1" y="1" width="478" height="298" rx="20" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="48" y="48" width="384" height="204" rx="14" fill="#fff" stroke="#cbd5e1"/>
+  <circle cx="78" cy="78" r="8" fill="#2563eb"/>
+  <path d="M98 78h132" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+  <g fill="#f8fafc" stroke="#e2e8f0"><rect x="70" y="112" width="158" height="112" rx="10"/><rect x="246" y="112" width="164" height="50" rx="10"/><rect x="246" y="174" width="164" height="50" rx="10"/></g>
+  <g fill="#2563eb"><circle cx="92" cy="138" r="5"/><circle cx="92" cy="168" r="5"/><circle cx="92" cy="198" r="5"/><rect x="266" y="132" width="32" height="7" rx="3.5"/><rect x="266" y="194" width="32" height="7" rx="3.5"/></g>
+  <g stroke="#94a3b8" stroke-width="6" stroke-linecap="round"><path d="M106 138h92"/><path d="M106 168h76"/><path d="M106 198h100"/><path d="M310 136h70"/><path d="M310 198h56"/></g>
+</svg>

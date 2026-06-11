@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# supabase cli
+/supabase/.temp/
+
 # next.js
 /.next/
 /out/
@@ -41,8 +44,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# project docs
+docs/*
+!docs/LOGGING.md
+!docs/OLLAMA.md
+!docs/IMPLEMENTATION_LOG.md
+!docs/PROJECT-INTAKE.md
+!docs/VISUAL-ASSETS.md
 
-#docs
-docs/
+
 
 supabase/.temp

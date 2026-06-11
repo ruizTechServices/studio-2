@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" role="img" aria-labelledby="title desc">
+  <title id="title">Empty project workspace</title>
+  <desc id="desc">An empty project frame ready for a repository connection.</desc>
+  <rect x="1" y="1" width="478" height="298" rx="20" fill="#f8fafc" stroke="#e2e8f0"/>
+  <path d="M150 104h76l18 20h86v96H150z" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+  <path d="M174 150h132M174 174h94" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="330" cy="208" r="34" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+  <path d="M330 192v32M314 208h32" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+</svg>

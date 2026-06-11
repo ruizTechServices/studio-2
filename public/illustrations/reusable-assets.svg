@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" role="img" aria-labelledby="title desc">
+  <title id="title">Reusable asset extraction</title>
+  <desc id="desc">Components, utilities, and patterns extracted from project source files.</desc>
+  <rect x="1" y="1" width="478" height="298" rx="20" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="48" y="54" width="154" height="192" rx="12" fill="#fff" stroke="#cbd5e1"/>
+  <g stroke="#94a3b8" stroke-width="7" stroke-linecap="round"><path d="M72 88h92"/><path d="M72 118h106"/><path d="M72 148h78"/><path d="M72 178h98"/><path d="M72 208h64"/></g>
+  <path d="M232 62v176" stroke="#2563eb" stroke-width="3"/>
+  <path d="m220 150 12 12 12-12" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+  <g fill="#fff" stroke="#cbd5e1"><rect x="270" y="60" width="158" height="48" rx="10"/><rect x="270" y="126" width="158" height="48" rx="10"/><rect x="270" y="192" width="158" height="48" rx="10"/></g>
+  <g fill="#2563eb"><rect x="290" y="80" width="34" height="8" rx="4"/><rect x="290" y="146" width="34" height="8" rx="4"/><rect x="290" y="212" width="34" height="8" rx="4"/></g>
+  <g stroke="#94a3b8" stroke-width="6" stroke-linecap="round"><path d="M338 84h62"/><path d="M338 150h48"/><path d="M338 216h70"/></g>
+</svg>
