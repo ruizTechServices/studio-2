@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+import { SystemMapSeedView } from '@/components/intake/scan-results/system-map-seed-view'
 import type { ScanResults } from '@/lib/intake/results/contracts'
 import {
   formatBytes,
@@ -226,6 +227,8 @@ export function ScanResultsView({ results }: Readonly<{ results: ScanResults }>)
           counts={formatCounts(statistics.categoryCounts)}
         />
       </section>
+
+      <SystemMapSeedView seed={results.systemMapSeed} />
 
       <InventoryPreview results={results} />
     </div>

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { ScanResultsView } from '@/components/intake/scan-results/scan-results-view'
 import type { ScanResults } from '@/lib/intake/results/contracts'
+import { buildSystemMapSeed } from '@/lib/intake/system-map/build-system-map-seed'
 
 function results(overrides: Partial<ScanResults['scan']> = {}): ScanResults {
   return {
@@ -46,6 +47,18 @@ function results(overrides: Partial<ScanResults['scan']> = {}): ScanResults {
         isText: true,
       },
     ],
+    systemMapSeed: buildSystemMapSeed('scan-id', 'project-id', [
+      {
+        relativePath: 'src/index.ts',
+        name: 'index.ts',
+        extension: 'ts',
+        language: 'TypeScript',
+        category: 'source',
+        sizeBytes: 1024,
+        depth: 2,
+        isText: true,
+      },
+    ]),
   }
 }
 
@@ -57,7 +70,7 @@ describe('ScanResultsView', () => {
     expect(html).toContain('src/index.ts')
     expect(html).toContain('TypeScript')
     expect(html).not.toContain('contentHash')
-    expect(html).not.toContain('source contents')
+    expect(html).not.toContain('console.log("secret source")')
   })
 
   it('renders safe warning and failed states', () => {

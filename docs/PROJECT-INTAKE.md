@@ -6,8 +6,9 @@ are introduced.
 
 ## Current Status
 
-Phase 1 intake, Phase 2 queue mechanics, Phase 3 safe archive intake, and the
-Phase 4 deterministic results view are implemented:
+Phase 1 intake, Phase 2 queue mechanics, Phase 3 safe archive intake, Phase 4
+deterministic results view, and the Phase 5 metadata-only system-map seed are
+implemented:
 
 - `/dashboard/import` validates an exact public GitHub repository URL and an
   optional explicit ref.
@@ -25,6 +26,9 @@ Phase 4 deterministic results view are implemented:
   persists metadata-only file inventory.
 - Completed scans link to a server-rendered dashboard results page with safe
   statistics, warnings, grouped counts, and a bounded metadata-only preview.
+- The results read model derives a stable, bounded structure seed that groups
+  routes, pages, endpoints, components, tests, docs, config, assets, styles,
+  database files, scripts, source modules, and other files.
 
 ## Safety Boundary
 
@@ -91,7 +95,8 @@ error, and summary status. The Phase 1 response contract remains unchanged.
 Loads scan results server-side through a narrowly scoped service-role RPC.
 Displays project identity, refs, commit SHA, statistics, warnings, safe errors,
 language/category counts, and at most 50 metadata-only inventory rows. It never
-returns or displays source contents or content hashes.
+returns or displays source contents or content hashes. It also renders the
+first compact MVP system overview from deterministic metadata-only groups.
 
 ## Database Model
 
@@ -102,6 +107,7 @@ Migrations:
 - `supabase/migrations/20260611000000_create_scan_worker_foundation.sql`
 - `supabase/migrations/20260612000000_create_phase_3_archive_intake.sql`
 - `supabase/migrations/20260612010000_create_phase_4_scan_results_read.sql`
+- `supabase/migrations/20260612020000_create_phase_5_system_map_seed_read.sql`
 
 `public.projects` stores normalized public GitHub repository identity.
 `public.scans` stores immutable scan identity, queue status, attempts, retry
@@ -111,6 +117,8 @@ schedule, lease health, policy limits, safe results, and timestamps.
 revoked; lease-checked service-role RPCs control mutations.
 `get_scan_results` is a read-only service-role RPC that verifies the
 project/scan pair and returns a bounded metadata-only preview.
+`get_scan_system_map_files` verifies the project/scan pair and returns only the
+private inventory metadata required to derive the bounded system-map seed.
 
 RLS is enabled on all intake tables. Public, anon, and authenticated access is
 revoked. Worker RPCs use row ownership checks and are executable only by

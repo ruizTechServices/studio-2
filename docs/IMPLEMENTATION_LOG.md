@@ -666,3 +666,45 @@ applied to the linked Supabase project.
 - Root .md files: `AGENTS.md`, `README.md`, `CLAUDE.md` (pointer to
   AGENTS.md). `IMPLEMENTATION_LOG.md` already lives in `docs/`. No root files
   required moving to `docs/`.
+
+---
+
+## DETERMINISTIC SYSTEM MAP SEED PHASE 5 — 2026-06-12
+
+### Implemented
+
+- Added conservative metadata-only classifiers for routes, pages, API
+  endpoints, components, tests, docs, config, assets, styles, database files,
+  scripts, source modules, and other files.
+- Added a stable system-map seed contract with complete group counts, bounded
+  previews, top-level directories, deterministic framework hints, structural
+  flags, and bounded largest-file metadata.
+- Extended the Phase 4 read model and results page with a compact deterministic
+  system overview.
+- Added a read-only, service-role-only RPC that returns only the private
+  `scan_files` metadata required to generate the seed.
+
+### Intentional Boundary
+
+Phase 5 is the first MVP system-map foundation, not the final graph. It does
+not parse, persist, display, or log source contents and does not add AI,
+embeddings, reusable asset extraction, graph canvas, or file browsing.
+
+### Verification
+
+```text
+supabase db reset     passed; all migrations applied locally
+supabase db lint      passed; no schema errors
+supabase db advisors  passed; no local issues
+local Phase 5 RPC     passed; approved metadata only, anon/authenticated denied
+npm run lint          passed
+npx tsc --noEmit      passed
+npm run test          passed: 37 files, 243 tests
+npm run test:coverage passed: 90.47% statements, 86.69% branches
+npm run build         passed
+git diff --check      passed
+hidden Unicode scan   passed
+```
+
+The linked Supabase migration check still returns HTTP 403, so the Phase 5
+migration has not been applied or verified against the linked project.

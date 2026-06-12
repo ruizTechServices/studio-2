@@ -4,8 +4,11 @@ import type {
   ScanResults,
 } from '@/lib/intake/results/contracts'
 import { createServiceRoleClient } from '@/lib/server'
+import { buildSystemMapSeed } from '@/lib/intake/system-map/build-system-map-seed'
+import type { SystemMapFileMetadata } from '@/lib/intake/system-map/contracts'
 
 const CATEGORIES = new Set(['test', 'docs', 'config', 'asset', 'source', 'other'])
+const SYSTEM_MAP_FILE_LIMIT = 20_000
 
 export class ScanResultsPersistenceError extends Error {
   constructor(
@@ -60,7 +63,44 @@ function parsePreview(value: unknown): readonly ScanInventoryPreviewRow[] | null
   return rows
 }
 
-function parseResults(value: unknown): ScanResults | null {
+function parseSystemMapFiles(value: unknown): readonly SystemMapFileMetadata[] | null {
+  if (!Array.isArray(value) || value.length > SYSTEM_MAP_FILE_LIMIT) return null
+  const files: SystemMapFileMetadata[] = []
+  for (const file of value) {
+    if (
+      !isRecord(file) ||
+      typeof file.relativePath !== 'string' ||
+      typeof file.name !== 'string' ||
+      !nullableString(file.extension) ||
+      !nullableString(file.language) ||
+      typeof file.category !== 'string' ||
+      !CATEGORIES.has(file.category) ||
+      !Number.isSafeInteger(file.sizeBytes) ||
+      (file.sizeBytes as number) < 0 ||
+      !Number.isSafeInteger(file.depth) ||
+      (file.depth as number) < 0 ||
+      typeof file.isText !== 'boolean'
+    ) {
+      return null
+    }
+    files.push({
+      relativePath: file.relativePath,
+      name: file.name,
+      extension: file.extension,
+      language: file.language,
+      category: file.category as SystemMapFileMetadata['category'],
+      sizeBytes: file.sizeBytes as number,
+      depth: file.depth as number,
+      isText: file.isText,
+    })
+  }
+  return files
+}
+
+function parseResults(
+  value: unknown,
+  systemMapFiles: readonly SystemMapFileMetadata[]
+): ScanResults | null {
   if (!isRecord(value) || !isRecord(value.project) || !isRecord(value.scan)) return null
   const { project, scan } = value
   const preview = parsePreview(value.inventoryPreview)
@@ -112,6 +152,7 @@ function parseResults(value: unknown): ScanResults | null {
       updatedAt: scan.updatedAt,
     },
     inventoryPreview: preview,
+    systemMapSeed: buildSystemMapSeed(scan.id, scan.projectId, systemMapFiles),
   }
 }
 
@@ -136,7 +177,22 @@ export async function getScanResults(
   }
   if (data === null) return null
 
-  const parsed = parseResults(data)
+  const systemMapResponse = await client.rpc('get_scan_system_map_files', {
+    p_project_id: projectId,
+    p_scan_id: scanId,
+  })
+  if (systemMapResponse.error) {
+    throw new ScanResultsPersistenceError('database', 'Scan results are unavailable.')
+  }
+  const systemMapFiles = parseSystemMapFiles(systemMapResponse.data)
+  if (systemMapFiles === null) {
+    throw new ScanResultsPersistenceError(
+      'invalid_response',
+      'Scan results returned an invalid response.'
+    )
+  }
+
+  const parsed = parseResults(data, systemMapFiles)
   if (!parsed || parsed.project.id !== projectId || parsed.scan.id !== scanId) {
     throw new ScanResultsPersistenceError(
       'invalid_response',

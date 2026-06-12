@@ -4,6 +4,10 @@ A codebase intelligence studio — built for project recovery, system visualizat
 
 > Current project status: see [AGENTS.md](./AGENTS.md)
 
+Phase 5 adds the first MVP-aligned deterministic system-map seed. It derives a
+compact project structure overview from private file metadata only; source
+parsing, AI, embeddings, and reusable asset extraction remain deferred.
+
 ## Prerequisites
 
 - Node.js 20+

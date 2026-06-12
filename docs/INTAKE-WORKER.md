@@ -78,7 +78,9 @@ rejected without calling GitHub tag endpoints.
 ## Next Milestone
 
 Add deterministic JavaScript and TypeScript scanning without weakening the
-Phase 3 metadata-only persistence boundary. Phase 4 exposes existing scan
-metadata through a read-only results view; it does not add parsing, maps, or AI.
+Phase 3 metadata-only persistence boundary. Phase 5 now supplies the first
+MVP-aligned system-map seed from inventory metadata only; deeper relationships,
+source parsing, graph visualization, AI, and reusable asset extraction remain
+deferred.
 
 > Last auto-updated: 2026-06-12

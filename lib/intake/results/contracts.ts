@@ -1,5 +1,6 @@
 import type { FileCategory } from '@/lib/intake/archive/contracts'
 import type { ScanStatus } from '@/lib/intake/contracts'
+import type { SystemMapSeed } from '@/lib/intake/system-map/contracts'
 
 export interface ScanResultsProject {
   readonly id: string
@@ -37,6 +38,7 @@ export interface ScanResults {
   readonly project: ScanResultsProject
   readonly scan: ScanResultsScan
   readonly inventoryPreview: readonly ScanInventoryPreviewRow[]
+  readonly systemMapSeed: SystemMapSeed
 }
 
 export interface CountItem {
