@@ -1,11 +1,8 @@
 # Intake Worker
 
-Phase 2 adds a private, manually-run, single-concurrency Node worker for durable
-scan queue mechanics. The existing `public.scans` table is the queue source,
-and immutable lifecycle history is appended to `public.scan_events`.
-
-Phase 2 does not fetch repositories, download or extract archives, parse files,
-persist source code, call Ollama, or claim that a source scan completed.
+The private, manually-run, single-concurrency Node worker combines durable
+queue mechanics with Phase 3 safe public GitHub archive intake. It inventories
+file metadata without persisting or extracting source files.
 
 ## Run Commands
 
@@ -25,6 +22,7 @@ the existing server-only Supabase variables:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
+GITHUB_TOKEN= # optional; never enables private repository intake
 ```
 
 Optional worker settings:
@@ -54,12 +52,10 @@ concurrency is fixed at one.
 6. Terminal failures become `failed` with safe error fields and emit `failed`.
 7. Expired active scans that exhausted their attempt budget are marked
    `failed` by the next claim operation.
-8. `complete_scan` exists for a later real processor and emits `completed`, but
-   the Phase 2 placeholder never calls it successfully.
-
-The Phase 2 placeholder performs metadata-level validation only, then marks the
-scan failed with `phase_3_not_implemented`. This is intentional: a queued scan
-proves worker mechanics without pretending repository content was processed.
+8. Phase 3 resolves an immutable public GitHub commit, downloads a bounded
+   archive, stream-validates it, and writes inventory in lease-checked batches.
+9. Atomic finalization verifies the expected inventory count before emitting
+   `completed` or `completed_with_warnings`.
 
 ## Security
 
@@ -68,13 +64,20 @@ proves worker mechanics without pretending repository content was processed.
   authenticated roles.
 - Browser APIs do not expose worker controls or scan events.
 - Logs contain scan IDs, worker IDs, attempt counts, and safe error codes only.
-- Source contents, secrets, tokens, environment values, archives, and private
-  URLs must never be logged or persisted by the worker.
+- Source contents, secrets, tokens, environment values, archives, paths,
+  filenames, and private URLs must never be logged by the worker.
+- Source contents and archives are never persisted. Repository-relative paths
+  are persisted only as private inventory metadata.
+
+## Supported Source References
+
+Phase 3 supports blank refs resolved through the default branch, named
+branches, and full 40-character commit SHAs. Tags and private repositories are
+rejected without calling GitHub tag endpoints.
 
 ## Next Milestone
 
-Phase 3 adds hostile-input fixtures and bounded GitHub archive intake. It must
-enforce redirect allowlisting, download/extraction limits, and archive safety
-before deterministic scanning begins.
+Add deterministic JavaScript and TypeScript scanning without weakening the
+Phase 3 metadata-only persistence boundary.
 
-> Last auto-updated: 2026-06-11
+> Last auto-updated: 2026-06-12

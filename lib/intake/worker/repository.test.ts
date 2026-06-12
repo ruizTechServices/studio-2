@@ -25,6 +25,9 @@ describe('scanWorkerRepository', () => {
         {
           scan_id: SCAN_ID,
           project_id: PROJECT_ID,
+          owner: 'owner',
+          repository: 'repository',
+          default_branch: 'main',
           requested_ref: 'main',
           status: 'validating',
           attempt_count: 1,
@@ -46,6 +49,9 @@ describe('scanWorkerRepository', () => {
     ).resolves.toEqual({
       scanId: SCAN_ID,
       projectId: PROJECT_ID,
+      owner: 'owner',
+      repository: 'repository',
+      defaultBranch: 'main',
       requestedRef: 'main',
       status: 'validating',
       attemptCount: 1,

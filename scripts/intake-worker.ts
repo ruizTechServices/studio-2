@@ -8,9 +8,13 @@ loadEnvConfig(process.cwd())
 
 const processOnce = process.argv.includes('--once')
 let stopping = false
+const shutdownController = new AbortController()
 
 function requestStop(signal: string): void {
   stopping = true
+  shutdownController.abort(
+    new Error('Scan worker shutdown was requested.')
+  )
   void logInfo({
     message: 'Intake worker shutdown requested',
     context: { signal },
@@ -38,7 +42,9 @@ async function main(): Promise<void> {
 
   do {
     try {
-      const result = await runWorkerOnce(config)
+      const result = await runWorkerOnce(config, {
+        signal: shutdownController.signal,
+      })
 
       if (processOnce || stopping) {
         break

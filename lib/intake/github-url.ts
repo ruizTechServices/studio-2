@@ -12,3 +12,17 @@ export function buildGitHubArchiveUrl(
 ): string {
   return `https://codeload.github.com/${repository.owner}/${repository.repository}/tar.gz/${encodeURIComponent(ref)}`
 }
+
+export function buildGitHubApiBranchUrl(
+  repository: ValidatedGitHubRepository,
+  branch: string
+): string {
+  return `${buildGitHubApiRepositoryUrl(repository)}/branches/${encodeURIComponent(branch)}`
+}
+
+export function buildGitHubApiCommitUrl(
+  repository: ValidatedGitHubRepository,
+  commitSha: string
+): string {
+  return `${buildGitHubApiRepositoryUrl(repository)}/commits/${encodeURIComponent(commitSha)}`
+}

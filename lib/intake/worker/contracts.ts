@@ -1,4 +1,5 @@
 import type { TerminalScanStatus } from '@/lib/intake/contracts'
+import type { ScanFileInventory } from '@/lib/intake/archive/contracts'
 
 export interface WorkerConfig {
   readonly workerId: string
@@ -11,6 +12,9 @@ export interface WorkerConfig {
 export interface ScanClaim {
   readonly scanId: string
   readonly projectId: string
+  readonly owner: string
+  readonly repository: string
+  readonly defaultBranch: string | null
   readonly requestedRef: string | null
   readonly status: 'validating'
   readonly attemptCount: number
@@ -25,9 +29,23 @@ export interface ScanCompletion {
   >
   readonly statistics: Record<string, unknown>
   readonly warnings: readonly string[]
+  readonly projectId: string
+  readonly defaultBranch: string
+  readonly resolvedRef: string
+  readonly sourceCommitSha: string
+  readonly expectedFileCount: number
 }
 
-export type ScanProcessor = (claim: ScanClaim) => Promise<ScanCompletion>
+export interface ScanProcessorContext {
+  readonly repository: ScanWorkerRepository
+  readonly workerId: string
+  readonly signal: AbortSignal
+}
+
+export type ScanProcessor = (
+  claim: ScanClaim,
+  context: ScanProcessorContext
+) => Promise<ScanCompletion>
 
 export interface ScanWorkerRepository {
   claimNextScan(config: WorkerConfig): Promise<ScanClaim | null>
@@ -35,6 +53,17 @@ export interface ScanWorkerRepository {
     scanId: string,
     workerId: string,
     leaseSeconds: number
+  ): Promise<boolean>
+  transitionScanStage(
+    scanId: string,
+    workerId: string,
+    status: 'validating' | 'fetching' | 'extracting' | 'persisting'
+  ): Promise<boolean>
+  beginScanInventory(scanId: string, workerId: string): Promise<boolean>
+  persistScanFilesBatch(
+    scanId: string,
+    workerId: string,
+    files: readonly ScanFileInventory[]
   ): Promise<boolean>
   releaseScanForRetry(
     scanId: string,

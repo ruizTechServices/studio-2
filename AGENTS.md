@@ -12,7 +12,7 @@ This is a **codebase intelligence studio** — not a generic SaaS app. The produ
 
 ## Current State (as of 2026-06-11)
 
-Branch: `main`. The v0 app shell, Ollama integration, marketing surface, visual asset foundation, and Phase 2 private intake worker foundation are complete. Repository fetching and deterministic scanning have not started.
+Branch: `codex/phase-3-safe-github-archive-intake`. The v0 app shell, Ollama integration, marketing surface, visual asset foundation, and Phase 3 safe GitHub archive intake are complete. Deterministic source scanning has not started.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -43,6 +43,8 @@ Completed since initial scaffold:
 - `lib/intake/worker/` + `scripts/intake-worker.ts` — private single-concurrency worker with claims, leases, retries, safe failures, and a Phase 3 placeholder boundary
 - `supabase/migrations/20260611000000_create_scan_worker_foundation.sql` — durable scan events, retry scheduling, heartbeats, and service-role-only worker RPCs
 - `docs/INTAKE-WORKER.md` — Phase 2 worker operations and safety contract
+- `lib/intake/archive/` — bounded GitHub metadata resolution, archive download, hostile-entry validation, hashing, and metadata-only inventory
+- `supabase/migrations/20260612000000_create_phase_3_archive_intake.sql` — private scan file inventory and lease-checked Phase 3 RPCs
 
 ## Architecture Rules
 
@@ -65,15 +67,14 @@ Completed since initial scaffold:
 
 - Do not add authentication pages or auth flows — the system model must be defined first.
 - Do not build downstream project-feature pages until intake produces validated, persisted scan evidence.
-- Do not add repository fetching, archive extraction, parsers, or AI summaries to the Phase 2 worker foundation.
+- Do not persist or log source contents, extract source files to disk, or add AI summaries to the Phase 3 intake boundary.
 - Do not expand the AI layer into agent/agentic patterns before the project intake surface is stable.
 
 ## Next Steps (in order)
 
 1. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
 2. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
-3. Build Phase 3 bounded GitHub archive intake and hostile-input fixtures.
-4. Add deterministic JS/TS scanning before system-map, reusable-asset, status-summary, or AI-summary work.
+3. Add deterministic JS/TS scanning before system-map, reusable-asset, status-summary, or AI-summary work.
 
 ## Environment Variables
 
@@ -84,6 +85,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=        # server-only, never prefix with NEXT_PUBLIC_
 PROJECT_INTAKE_ENABLED=true       # local/dev only; production intake always returns 404
+GITHUB_TOKEN=                     # optional; public GitHub rate-limit improvement only
 SCAN_WORKER_ID=                   # optional stable worker ID
 SCAN_WORKER_LEASE_SECONDS=120
 SCAN_WORKER_MAX_ATTEMPTS=3
@@ -97,4 +99,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-11
+> Last auto-updated: 2026-06-12

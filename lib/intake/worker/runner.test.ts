@@ -17,10 +17,7 @@ vi.mock('@/lib/logger/server', () => ({
   logWarn: mocks.logWarn,
 }))
 
-import {
-  processPhase2Placeholder,
-  runWorkerOnce,
-} from '@/lib/intake/worker/runner'
+import { runWorkerOnce } from '@/lib/intake/worker/runner'
 
 const config: WorkerConfig = {
   workerId: 'worker-1',
@@ -33,6 +30,9 @@ const config: WorkerConfig = {
 const claim: ScanClaim = {
   scanId: '123e4567-e89b-42d3-a456-426614174001',
   projectId: '123e4567-e89b-42d3-a456-426614174000',
+  owner: 'owner',
+  repository: 'repository',
+  defaultBranch: 'main',
   requestedRef: 'main',
   status: 'validating',
   attemptCount: 1,
@@ -46,6 +46,9 @@ function createRepository(
   return {
     claimNextScan: vi.fn().mockResolvedValue(claim),
     heartbeatScan: vi.fn().mockResolvedValue(true),
+    transitionScanStage: vi.fn().mockResolvedValue(true),
+    beginScanInventory: vi.fn().mockResolvedValue(true),
+    persistScanFilesBatch: vi.fn().mockResolvedValue(true),
     releaseScanForRetry: vi.fn().mockResolvedValue(true),
     failScan: vi.fn().mockResolvedValue(true),
     completeScan: vi.fn().mockResolvedValue(true),
@@ -56,15 +59,6 @@ function createRepository(
 beforeEach(() => {
   mocks.logInfo.mockResolvedValue(undefined)
   mocks.logWarn.mockResolvedValue(undefined)
-})
-
-describe('processPhase2Placeholder', () => {
-  it('stops safely at the Phase 3 boundary', async () => {
-    await expect(processPhase2Placeholder(claim)).rejects.toMatchObject({
-      code: 'phase_3_not_implemented',
-      retryable: false,
-    })
-  })
 })
 
 describe('runWorkerOnce', () => {
@@ -86,6 +80,11 @@ describe('runWorkerOnce', () => {
       status: 'completed' as const,
       statistics: { files: 0 },
       warnings: [],
+      projectId: claim.projectId,
+      defaultBranch: 'main',
+      resolvedRef: 'main',
+      sourceCommitSha: 'a'.repeat(40),
+      expectedFileCount: 0,
     }
 
     await expect(
@@ -133,11 +132,13 @@ describe('runWorkerOnce', () => {
     await expect(
       runWorkerOnce(config, {
         repository,
-        processor: processPhase2Placeholder,
+        processor: vi.fn().mockRejectedValue(
+          new WorkerFailure('unsafe_archive', 'Repository archive is unsafe.', false)
+        ),
       })
     ).resolves.toMatchObject({
       outcome: 'failed',
-      failure: { code: 'phase_3_not_implemented' },
+      failure: { code: 'unsafe_archive' },
     })
     expect(repository.failScan).toHaveBeenCalled()
     expect(repository.releaseScanForRetry).not.toHaveBeenCalled()
