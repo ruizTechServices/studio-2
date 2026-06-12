@@ -113,8 +113,9 @@ studio-2/
 │   └── utils.ts                    # cn() utility
 ├── scripts/intake-worker.ts        # CLI entry — worker:intake / worker:intake:once
 ├── supabase/
-│   ├── migrations/                 # 7 migrations: logs, intake foundation, grants,
-│   │                               # worker foundation, claim fix, phase 3 archive, phase 4 read
+│   ├── migrations/                 # 8 migrations: logs, intake foundation, grants,
+│   │                               # worker foundation, claim fix, phase 3 archive,
+│   │                               # phase 4 read, phase 5 system-map seed read
 │   └── sql/enable_logs_retention.sql # pg_cron daily purge (logs > 30d) — opt-in
 ├── docs/                           # IMPLEMENTATION_LOG, INTAKE-WORKER, LOGGING, OLLAMA,
 │                                   # PROJECT-INTAKE, VISUAL-ASSETS, misc/

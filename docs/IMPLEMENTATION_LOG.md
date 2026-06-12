@@ -708,3 +708,36 @@ hidden Unicode scan   passed
 
 The linked Supabase migration check still returns HTTP 403, so the Phase 5
 migration has not been applied or verified against the linked project.
+
+---
+
+## DOCS MAINTENANCE (AUTOMATED SYNC) — 2026-06-12 (post-Phase 5)
+
+### Repo State Observed
+
+- Latest commit `60909de feat: add phase 5 deterministic system map seed`, on
+  top of merged Phase 4 (PR #4, `d30fb97`) and Phase 3 (PR #3, `8055a3e`).
+- Working tree resides on branch `codex/phase-5-deterministic-system-map-seed`.
+- Root .md files: `AGENTS.md`, `README.md`, `CLAUDE.md` (one-line pointer to
+  `AGENTS.md`). `IMPLEMENTATION_LOG.md` already lives in `docs/`. No root .md
+  files required migration or moving this run.
+- Canonical docs were already current as of the Phase 5 commit: `AGENTS.md`
+  reflects Phase 5 status and the deterministic system-map seed module;
+  `README.md` is setup-only with a status pointer; `IMPLEMENTATION_LOG.md`
+  carries the Phase 5 entry.
+
+### Changed
+
+- `AGENTS.md`: corrected the project-structure tree's Supabase migrations
+  comment from "7 migrations" to "8 migrations" and added the Phase 5
+  `20260612020000_create_phase_5_system_map_seed_read.sql` read migration,
+  which the tree had omitted (the Completed list already referenced it).
+
+### Verified Accurate (no change needed)
+
+- Codebase structure in `AGENTS.md` matches the actual `app/`, `components/`,
+  `lib/`, `config/`, `scripts/`, and `supabase/` file tree (incl.
+  `lib/intake/system-map/` and `components/intake/scan-results/`).
+- `docs/` inventory (`IMPLEMENTATION_LOG`, `INTAKE-WORKER`, `LOGGING`, `OLLAMA`,
+  `PROJECT-INTAKE`, `VISUAL-ASSETS`, `misc/`) matches the documented set.
+- 8 migrations on disk match the documented schema history.
