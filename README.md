@@ -2,52 +2,16 @@
 
 A codebase intelligence studio — built for project recovery, system visualization, reusable asset extraction, and work-session continuity.
 
-This is a clean Next.js rebuild of `ruizTechStudio`, starting from a clarified product direction with intentional architecture.
+> Current project status: see [AGENTS.md](./AGENTS.md)
 
-## Stack
+## Prerequisites
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16.2.7 (App Router) |
-| UI Runtime | React 19.2.4 |
-| Language | TypeScript (strict) |
-| Styling | Tailwind CSS 4 |
-| Components | shadcn/ui (base-luma style) |
-| Icons | lucide-react |
-| Brand and Illustrations | Project-owned SVG and generated favicon/app-icon assets |
-| Motion | Lightweight CSS/SVG animation components |
-| Data Layer | Supabase (postgres + auth) |
-| Supabase Helpers | `@supabase/supabase-js`, `@supabase/ssr` |
-| Package Manager | npm |
+- Node.js 20+
+- npm
+- A Supabase project (and optionally the Supabase CLI for local migrations)
+- A reachable Ollama instance (for the AI endpoints)
 
-## Current Implementation Status
-
-The deterministic application foundation and safe Phase 3 GitHub archive
-intake are complete:
-
-- App Router shell, marketing landing page, and dashboard overview
-- Centralized server/client logging with Supabase persistence support
-- Stateless, token-budgeted Ollama API integration
-- Project-owned logo, favicon, app-icon, and placement-illustration library
-- Reusable accessible animations for scanning, system mapping, asset extraction,
-  project analysis, and subtle dashboard panel motion
-- Exact public GitHub repository URL and ref validation
-- Local-only `/dashboard/import` workflow with durable queued scan creation and
-  safe scan-status polling
-- Supabase `projects` and `scans` migration with RLS and service-role-only access
-- Durable `scan_events`, atomic claims, leases, heartbeats, retries, and safe
-  terminal failure handling
-- Manually-run single-concurrency intake worker with process-once and
-  continuous polling modes
-- Public GitHub branch and full-commit-SHA resolution to immutable commits
-- Bounded `tar.gz` download, streaming hostile-archive validation, and
-  metadata-only file inventory
-
-The worker never persists, logs, or returns source contents. The next product
-milestone is deterministic JavaScript and TypeScript scanning from bounded
-source streams.
-
-## Getting Started
+## Install and Run
 
 ```bash
 npm install
@@ -56,155 +20,34 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Environment variables
+## Environment Variables
 
 Create a `.env.local` file at the project root (never commit this):
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
-PROJECT_INTAKE_ENABLED=true
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=          # server-only, never prefix with NEXT_PUBLIC_
+PROJECT_INTAKE_ENABLED=true         # local/dev only; production intake always returns 404
 GITHUB_TOKEN=                       # optional, rate-limit improvement only
-SCAN_WORKER_ID=
+SCAN_WORKER_ID=                     # optional stable worker ID
 SCAN_WORKER_LEASE_SECONDS=120
 SCAN_WORKER_MAX_ATTEMPTS=3
 SCAN_WORKER_POLL_MS=5000
 SCAN_WORKER_RETRY_DELAY_SECONDS=60
-OLLAMA_GPU_BASE_URL=http://100.86.175.53:11435
-OLLAMA_DEFAULT_MODEL=qwen2.5:7b-instruct-q4_K_M
+OLLAMA_GPU_BASE_URL=
+OLLAMA_DEFAULT_MODEL=
 OLLAMA_NUM_CTX=4096
 OLLAMA_NUM_PREDICT=256
 OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only and must never use a `NEXT_PUBLIC_`
-prefix. The Ollama variables are also server-only. See `docs/LOGGING.md` for
-centralized logging setup and usage, `docs/OLLAMA.md` for the stateless local AI
-endpoints, `docs/PROJECT-INTAKE.md` for the intake contract,
-`docs/INTAKE-WORKER.md` for worker operations, and `docs/VISUAL-ASSETS.md` for
-the brand and animation system.
+`SUPABASE_SERVICE_ROLE_KEY` and all Ollama variables are server-only.
 
-## Project Structure
+## Database Setup
 
-```
-studio-2/
-├── app/
-│   ├── api/
-│   │   ├── ai/
-│   │   │   ├── chat/
-│   │   │   │   ├── route.ts        # POST /api/ai/chat — stateless Ollama chat endpoint
-│   │   │   │   └── route.test.ts
-│   │   │   └── health/
-│   │   │       ├── route.ts        # GET /api/ai/health — Ollama reachability probe
-│   │   │       └── route.test.ts
-│   │   ├── log/
-│   │   │   ├── route.ts            # POST /api/log — client-side log ingestion endpoint
-│   │   │   └── route.test.ts
-│   │   ├── projects/import/
-│   │   │   ├── route.ts            # POST /api/projects/import — local-only queued scan creation
-│   │   │   └── route.test.ts
-│   │   └── scans/[scanId]/
-│   │       ├── route.ts            # GET /api/scans/[scanId] — local-only safe scan status
-│   │       └── route.test.ts
-│   ├── dashboard/
-│   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
-│   │   ├── import/page.tsx         # Local-only public GitHub intake surface
-│   │   └── page.tsx                # Dashboard overview page
-│   ├── apple-icon.png              # Next.js Apple touch icon
-│   ├── icon.svg                    # Next.js scalable app icon
-│   ├── layout.tsx                  # Root layout — fonts, global styles
-│   └── page.tsx                    # Marketing landing page
-├── components/
-│   ├── animations/                 # Accessible repo scan, map, extraction, loader, and ambient motion
-│   ├── app/
-│   │   ├── app-shell.tsx           # Main app layout (sidebar + header + content area)
-│   │   └── app-sidebar.tsx         # Fixed sidebar with dashboard navigation
-│   ├── brand/
-│   │   └── brand-logo.tsx          # Responsive in-product logo mark and wordmark
-│   ├── intake/
-│   │   └── project-intake-form.tsx # Phase 1 GitHub intake form (URL + ref input)
-│   ├── marketing/
-│   │   ├── marketing-navbar.tsx    # Public site navbar
-│   │   └── marketing-footer.tsx    # Public site footer
-│   └── ui/
-│       └── button.tsx              # shadcn/ui Button component
-├── config/
-│   ├── navigation.ts               # dashboardNavigation — sidebar nav items
-│   └── site.ts                     # siteConfig — name, description, mainNav
-├── lib/
-│   ├── ai/
-│   │   ├── chat-contract.ts        # Shared message/conversation types
-│   │   ├── context-builder.ts      # Builds token-budgeted message array from context
-│   │   ├── conversation-summary.ts # Conversation summarization helpers
-│   │   ├── model-config.ts         # ModelRequestConfig, env-driven defaults
-│   │   ├── model-policy.ts         # Request validation + allowed model list
-│   │   ├── ollama-client.ts        # chatWithOllama(), getOllamaModels(), OllamaClientError
-│   │   └── token-budget.ts         # Token estimation and budget enforcement
-│   ├── logger/
-│   │   ├── client.ts               # Client-side logger (posts to /api/log)
-│   │   ├── server.ts               # Server-side logger (writes directly to Supabase)
-│   │   ├── sanitize.ts             # Recursive redaction of sensitive keys
-│   │   ├── types.ts                # LogLevel, LogSource, LogInput, StoredLogEntry
-│   │   └── validation.ts           # validateLogInput(), isUuid()
-│   ├── intake/
-│   │   ├── contracts.ts            # Shared intake types and result shapes
-│   │   ├── github-url.ts           # Strict public GitHub URL and ref validation
-│   │   ├── http.ts                 # Fetch helpers for intake HTTP requests
-│   │   ├── policy.ts               # Intake policy limits (URL length, ref format, etc.)
-│   │   ├── repository.ts           # Supabase persistence helpers for projects/scans
-│   │   ├── validation.ts           # Top-level intake input validation
-│   │   └── worker/                 # Phase 2 private single-concurrency scan worker
-│   │       ├── config.ts           # Worker env config (lease, retry, poll intervals)
-│   │       ├── contracts.ts        # Worker-internal types (claims, events, outcomes)
-│   │       ├── failures.ts         # Safe terminal failure recording
-│   │       ├── repository.ts       # Worker Supabase RPC wrappers (claim, heartbeat, complete)
-│   │       └── runner.ts           # Main worker loop (process-once and continuous modes)
-│   ├── client.ts                   # Supabase browser client
-│   ├── server.ts                   # Supabase server client (RSC / Server Actions)
-│   ├── middleware.ts               # Supabase session middleware helper
-│   └── utils.ts                    # cn() utility (clsx + tailwind-merge)
-├── scripts/
-│   └── intake-worker.ts            # CLI entry point — runs worker:intake and worker:intake:once
-├── supabase/
-│   ├── migrations/
-│   │   ├── 20260609000000_create_logs.sql                          # public.logs table + RLS + indexes
-│   │   ├── 20260610214115_create_project_intake_foundation.sql     # projects/scans schema + service-role RPC
-│   │   ├── 20260610233821_restrict_phase_1_service_role_grants.sql # minimum Phase 1 service-role privileges
-│   │   └── 20260611000000_create_scan_worker_foundation.sql        # scan_events, claims, heartbeats, retries
-│   └── sql/
-│       └── enable_logs_retention.sql                               # pg_cron daily purge (logs > 30d)
-├── docs/
-│   ├── IMPLEMENTATION_LOG.md  # Historical implementation record and current milestone updates
-│   ├── INTAKE-WORKER.md       # Phase 2 worker operations and safety contract
-│   ├── LOGGING.md             # Logging system usage guide
-│   ├── OLLAMA.md              # Ollama AI integration guide
-│   ├── PROJECT-INTAKE.md      # Phase 1 and 2 intake contract, policy, and phased plan
-│   └── VISUAL-ASSETS.md       # Brand, illustration, favicon, and animation inventory
-├── public/
-│   ├── brand/                 # Static logo variants, favicon sources, and app icons
-│   └── illustrations/         # Product-specific placement illustrations
-├── components.json            # shadcn/ui config
-├── next.config.ts             # Next.js config
-├── vitest.config.ts           # Vitest test runner config
-├── tsconfig.json              # TypeScript config
-└── AGENTS.md                  # AI agent rules for this repo
-```
-
-## Key Conventions
-
-- Use `lib/server.ts` for Supabase calls inside Server Components and Server Actions. Create a new client per request — do not cache globally (Fluid compute compatibility).
-- Use `lib/client.ts` for Supabase calls inside Client Components.
-- `lib/middleware.ts` exports `updateSession()` — wire it into a `middleware.ts` file at the project root to keep auth sessions alive.
-- All component aliases route through `@/` (mapped to the project root in `tsconfig.json`).
-- `cn()` from `lib/utils.ts` is the standard utility for conditional Tailwind classes.
-- Use `lib/logger/server.ts` from Route Handlers, Server Actions, and server code. Use `lib/logger/client.ts` from Client Components. See `docs/LOGGING.md` for full usage.
-- AI chat goes through `lib/ai/` modules — never call Ollama directly from a route handler. Use `chatWithOllama()` from `lib/ai/ollama-client.ts` after validating via `lib/ai/model-policy.ts`.
-- Site/nav config lives in `config/` — update `config/navigation.ts` to add dashboard routes, `config/site.ts` for top-level site metadata.
-- Use `BrandLogo` for in-product branding. Use static light/dark logo variants only when assets leave the application.
-- Reuse animations from `components/animations/`; do not create one-off motion for feature pages. All motion must respect `prefers-reduced-motion`.
-- Meaningful illustrations require useful alt text. Decorative images use empty alt text, and decorative animations must be hidden from assistive technology.
+Apply the SQL migrations in `supabase/migrations/` to your Supabase project (e.g. `supabase db push`, or run them in order via the SQL editor). The optional `supabase/sql/enable_logs_retention.sql` script sets up a daily log purge and requires `pg_cron`.
 
 ## Scripts
 
@@ -220,17 +63,12 @@ npm run worker:intake:once # Process at most one eligible scan
 npm run worker:intake      # Poll the private scan queue continuously
 ```
 
-## Product Direction
+## Deployment
 
-The goal of this studio is to become a tool developers use when inheriting, recovering, or deeply understanding a codebase. Core MVP directions:
+Standard Next.js deployment (`npm run build` + `npm run start`, or a platform like Vercel). Set all environment variables above in the deployment environment. Project intake is automatically disabled in production regardless of `PROJECT_INTAKE_ENABLED`.
 
-- **Project intake** — ingest a repo and produce a system map
-- **Work-session memory** — persistent context across sessions
-- **Reusable asset extraction** — surface reusable patterns from existing code
-- **System visualization** — interactive graph of architecture and dependencies
+## Further Documentation
 
-See `docs/IMPLEMENTATION_LOG.md` for the full setup history.
-See `docs/PROJECT-INTAKE.md` for the project intake contract and phased plan.
-See `docs/VISUAL-ASSETS.md` for the implemented visual foundation and adoption guidance.
+Usage guides live in `docs/`: `LOGGING.md` (centralized logging), `OLLAMA.md` (stateless local AI endpoints), `PROJECT-INTAKE.md` (intake contract), `INTAKE-WORKER.md` (worker operations), and `VISUAL-ASSETS.md` (brand and animation system).
 
 > Last auto-updated: 2026-06-12

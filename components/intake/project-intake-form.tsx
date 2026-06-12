@@ -7,6 +7,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { FormEvent, useEffect, useRef, useState } from 'react'
 
 import {
@@ -29,6 +30,7 @@ import {
   validateGitHubRepositoryUrl,
   validateGitRef,
 } from '@/lib/intake/validation'
+import { getScanResultsPath } from '@/lib/intake/results/formatting'
 
 type FieldErrors = Partial<Record<IntakeField, string>>
 
@@ -239,6 +241,9 @@ export function ProjectIntakeForm() {
   }
 
   const isTerminal = scan ? isTerminalScanStatus(scan.status) : false
+  const resultsPath = scan
+    ? getScanResultsPath(scan.status, scan.projectId, scan.scanId)
+    : null
 
   return (
     <div className="space-y-6">
@@ -314,7 +319,7 @@ export function ProjectIntakeForm() {
                 setRef(event.target.value)
                 setFieldErrors((current) => ({ ...current, ref: undefined }))
               }}
-              placeholder="main, tag, or commit SHA"
+              placeholder="main or full commit SHA"
               spellCheck={false}
               aria-invalid={Boolean(fieldErrors.ref)}
               aria-describedby={fieldErrors.ref ? 'repository-ref-error' : undefined}
@@ -329,7 +334,7 @@ export function ProjectIntakeForm() {
               </p>
             ) : (
               <p className="mt-2 text-xs text-muted-foreground">
-                Leave blank to resolve the default branch in a future intake phase.
+                Leave blank to resolve and scan the repository default branch.
               </p>
             )}
           </div>
@@ -436,6 +441,14 @@ export function ProjectIntakeForm() {
                     <p className="mt-3 text-xs text-destructive">
                       {scan.safeError}
                     </p>
+                  ) : null}
+                  {resultsPath ? (
+                    <Link
+                      href={resultsPath}
+                      className="mt-4 inline-block text-xs font-medium text-blue-700 hover:underline"
+                    >
+                      View scan results
+                    </Link>
                   ) : null}
                 </div>
               </div>
