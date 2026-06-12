@@ -78,6 +78,7 @@ rejected without calling GitHub tag endpoints.
 ## Next Milestone
 
 Add deterministic JavaScript and TypeScript scanning without weakening the
-Phase 3 metadata-only persistence boundary.
+Phase 3 metadata-only persistence boundary. Phase 4 exposes existing scan
+metadata through a read-only results view; it does not add parsing, maps, or AI.
 
 > Last auto-updated: 2026-06-12

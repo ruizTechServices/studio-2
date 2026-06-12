@@ -6,8 +6,8 @@ are introduced.
 
 ## Current Status
 
-Phase 1 intake, Phase 2 queue mechanics, and Phase 3 safe archive intake are
-implemented:
+Phase 1 intake, Phase 2 queue mechanics, Phase 3 safe archive intake, and the
+Phase 4 deterministic results view are implemented:
 
 - `/dashboard/import` validates an exact public GitHub repository URL and an
   optional explicit ref.
@@ -23,6 +23,8 @@ implemented:
 - The manually-run Node worker resolves public default/named branches or full
   commit SHAs, downloads a bounded archive, stream-validates entries, and
   persists metadata-only file inventory.
+- Completed scans link to a server-rendered dashboard results page with safe
+  statistics, warnings, grouped counts, and a bounded metadata-only preview.
 
 ## Safety Boundary
 
@@ -84,6 +86,13 @@ credentials, ports, non-GitHub hosts, and non-HTTPS protocols are rejected.
 Returns the scan ID, project ID, lifecycle status, statistics, warnings, safe
 error, and summary status. The Phase 1 response contract remains unchanged.
 
+### `/dashboard/projects/[projectId]/scans/[scanId]`
+
+Loads scan results server-side through a narrowly scoped service-role RPC.
+Displays project identity, refs, commit SHA, statistics, warnings, safe errors,
+language/category counts, and at most 50 metadata-only inventory rows. It never
+returns or displays source contents or content hashes.
+
 ## Database Model
 
 Migrations:
@@ -91,6 +100,8 @@ Migrations:
 - `supabase/migrations/20260610214115_create_project_intake_foundation.sql`
 - `supabase/migrations/20260610233821_restrict_phase_1_service_role_grants.sql`
 - `supabase/migrations/20260611000000_create_scan_worker_foundation.sql`
+- `supabase/migrations/20260612000000_create_phase_3_archive_intake.sql`
+- `supabase/migrations/20260612010000_create_phase_4_scan_results_read.sql`
 
 `public.projects` stores normalized public GitHub repository identity.
 `public.scans` stores immutable scan identity, queue status, attempts, retry
@@ -98,8 +109,10 @@ schedule, lease health, policy limits, safe results, and timestamps.
 `public.scan_events` stores durable worker lifecycle history.
 `public.scan_files` stores metadata-only file inventory. Direct table access is
 revoked; lease-checked service-role RPCs control mutations.
+`get_scan_results` is a read-only service-role RPC that verifies the
+project/scan pair and returns a bounded metadata-only preview.
 
-RLS is enabled on all three tables. Public, anon, and authenticated access is
+RLS is enabled on all intake tables. Public, anon, and authenticated access is
 revoked. Worker RPCs use row ownership checks and are executable only by
 `service_role`. Claims use `FOR UPDATE SKIP LOCKED` to prevent double claims.
 

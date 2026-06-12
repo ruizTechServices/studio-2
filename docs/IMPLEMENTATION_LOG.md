@@ -601,3 +601,68 @@ lacks the required project privileges, so the migration has not been applied
 to the linked project. Production dependency audit reports the existing
 moderate PostCSS advisory through Next.js; the available automated fix would
 install a breaking, incorrect Next.js version.
+
+---
+
+## SCAN RESULTS PHASE 4 — 2026-06-12
+
+### Implemented
+
+- Added a read-only service-role RPC for verified project/scan result pairs and
+  a deterministic 50-row metadata-only inventory preview.
+- Added validated server-side results contracts, formatting helpers, and a
+  dynamic dashboard results route.
+- Added responsive scan summaries, warnings/safe failures, language/category
+  counts, and metadata-only inventory preview UI.
+- Added a completed-scan results link to the existing intake status panel.
+
+### Intentional Boundary
+
+Phase 4 displays deterministic metadata only. It does not display source
+contents or hashes and does not add parsing, system maps, AI, embeddings, or
+reusable asset extraction.
+
+### Verification
+
+```text
+supabase db reset     passed; all migrations applied
+supabase db lint      passed; no schema errors
+local results RPC     passed; bounded metadata returned, anon denied
+npm run lint          passed
+npx tsc --noEmit      passed
+npm run test          passed: 33 files, 232 tests
+npm run test:coverage passed: 89.77% statements, 85.76% branches
+npm run build         passed
+git diff --check      passed
+browser render        passed for completed_with_warnings results
+```
+
+The Phase 4 migration and read RPC are locally verified. They have not been
+applied to the linked Supabase project.
+
+---
+
+## DOCS MAINTENANCE (AUTOMATED SYNC) — 2026-06-12
+
+### Changed
+
+- `README.md` rewritten as setup-only: prerequisites, install, env var names,
+  database setup, scripts, deployment basics, and doc pointers. Status
+  narration ("Current Implementation Status"), the tech stack table, the
+  project structure tree, key conventions, and product direction were migrated
+  into `AGENTS.md` (the single source of truth for project status).
+- `AGENTS.md` updated to absorb the migrated content and to reflect the
+  current Phase 4 working tree: added the
+  `app/dashboard/projects/[projectId]/scans/[scanId]` results route, the
+  `20260611113256_qualify_claim_next_scan_columns.sql` and
+  `20260612010000_create_phase_4_scan_results_read.sql` migrations, the
+  `lib/intake/results/` and `components/intake/scan-results/` modules, and a
+  next step to apply the Phase 4 migration to the linked Supabase project.
+
+### Repo State Observed
+
+- Branch `codex/phase-4-scan-results-view` with uncommitted Phase 4 work on
+  top of merged PR #3 (Phase 3 safe GitHub archive intake, `8055a3e`).
+- Root .md files: `AGENTS.md`, `README.md`, `CLAUDE.md` (pointer to
+  AGENTS.md). `IMPLEMENTATION_LOG.md` already lives in `docs/`. No root files
+  required moving to `docs/`.
