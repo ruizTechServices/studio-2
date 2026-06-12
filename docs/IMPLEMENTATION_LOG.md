@@ -590,8 +590,14 @@ npm run build         passed
 git diff --check      passed
 ```
 
-The local Supabase database was not running, and linked migration history
-checks returned 403 because the current account lacks the required project
-privileges. The Phase 3 migration has not been applied. Production dependency
-audit reports the existing moderate PostCSS advisory through Next.js; the
-available automated fix would install a breaking, incorrect Next.js version.
+Local Supabase startup and clean `supabase db reset` applied every migration,
+including Phase 3. Local schema lint reports no errors. Direct RPC smoke tests
+confirmed claims, stage transitions, inventory clearing/batching, atomic
+finalization, expected-file-count rejection, retry cleanup, and denial of
+direct `service_role` access to `scan_files`.
+
+Linked migration history checks still return 403 because the current account
+lacks the required project privileges, so the migration has not been applied
+to the linked project. Production dependency audit reports the existing
+moderate PostCSS advisory through Next.js; the available automated fix would
+install a breaking, incorrect Next.js version.

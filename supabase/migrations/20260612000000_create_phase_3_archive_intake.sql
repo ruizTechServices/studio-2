@@ -124,7 +124,8 @@ begin
     return;
   end if;
 
-  delete from public.scan_files where scan_id = v_scan.id;
+  delete from public.scan_files as claimed_files
+  where claimed_files.scan_id = v_scan.id;
 
   update public.scans as claimed
   set status = 'validating',
