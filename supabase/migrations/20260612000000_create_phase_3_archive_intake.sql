@@ -66,15 +66,6 @@ begin
     raise exception 'invalid maximum attempts';
   end if;
 
-  delete from public.scan_files
-  where scan_id in (
-    select exhausted.id
-    from public.scans as exhausted
-    where exhausted.status in ('fetching', 'validating', 'extracting', 'parsing', 'persisting')
-      and exhausted.lease_expires_at <= v_now
-      and exhausted.attempt_count >= p_max_attempts
-  );
-
   with exhausted as (
     select candidate.id
     from public.scans as candidate
@@ -104,6 +95,12 @@ begin
   select id, 'failed', 'failed', 'attempts_exhausted',
     'Scan attempt limit was reached.'
   from failed;
+
+  delete from public.scan_files as files
+  using public.scans as failed_scan
+  where files.scan_id = failed_scan.id
+    and failed_scan.status = 'failed'
+    and failed_scan.safe_error_code = 'attempts_exhausted';
 
   select candidate.*
   into v_scan
@@ -203,14 +200,17 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  v_scan_id uuid;
 begin
-  if not exists (
-    select 1 from public.scans
+  select id into v_scan_id
+    from public.scans
     where id = p_scan_id
       and worker_id = p_worker_id
       and status = 'persisting'
       and lease_expires_at > now()
-  ) then
+    for update;
+  if v_scan_id is null then
     return false;
   end if;
 
@@ -229,6 +229,8 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  v_scan_id uuid;
 begin
   if jsonb_typeof(p_files) <> 'array' then
     raise exception 'invalid inventory batch';
@@ -236,13 +238,14 @@ begin
   if jsonb_array_length(p_files) < 1 or jsonb_array_length(p_files) > 500 then
     raise exception 'invalid inventory batch';
   end if;
-  if not exists (
-    select 1 from public.scans
+  select id into v_scan_id
+    from public.scans
     where id = p_scan_id
       and worker_id = p_worker_id
       and status = 'persisting'
       and lease_expires_at > now()
-  ) then
+    for update;
+  if v_scan_id is null then
     return false;
   end if;
 
@@ -283,6 +286,8 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  v_scan_id uuid;
 begin
   if p_status not in ('completed', 'completed_with_warnings')
     or p_source_commit_sha !~ '^[0-9a-f]{40}$'
@@ -291,22 +296,19 @@ begin
     or jsonb_typeof(p_warnings) <> 'array' then
     raise exception 'invalid completion payload';
   end if;
-  if not exists (
-    select 1 from public.scans
+  select id into v_scan_id
+    from public.scans
     where id = p_scan_id
       and project_id = p_project_id
       and worker_id = p_worker_id
       and status = 'persisting'
       and lease_expires_at > now()
-  ) or (
+    for update;
+  if v_scan_id is null or (
     select count(*) from public.scan_files where scan_id = p_scan_id
   ) <> p_expected_file_count then
     return false;
   end if;
-
-  update public.projects
-  set default_branch = p_default_branch, updated_at = now()
-  where id = p_project_id;
 
   update public.scans
   set status = p_status,
@@ -323,7 +325,19 @@ begin
     safe_error_message = null,
     completed_at = now(),
     updated_at = now()
-  where id = p_scan_id;
+  where id = p_scan_id
+    and project_id = p_project_id
+    and worker_id = p_worker_id
+    and status = 'persisting'
+    and lease_expires_at > now();
+
+  if not found then
+    return false;
+  end if;
+
+  update public.projects
+  set default_branch = p_default_branch, updated_at = now()
+  where id = p_project_id;
 
   insert into public.scan_events (scan_id, event_type, status, worker_id)
   values (p_scan_id, 'completed', p_status, p_worker_id);
@@ -345,13 +359,20 @@ set search_path = ''
 as $$
 declare
   v_updated boolean;
+  v_scan_id uuid;
 begin
-  delete from public.scan_files
-  where scan_id = p_scan_id
-    and exists (
-      select 1 from public.scans
-      where id = p_scan_id and worker_id = p_worker_id and lease_expires_at > now()
-    );
+  select id into v_scan_id
+  from public.scans
+  where id = p_scan_id
+    and worker_id = p_worker_id
+    and status in ('fetching', 'validating', 'extracting', 'parsing', 'persisting')
+    and lease_expires_at > now()
+  for update;
+  if v_scan_id is null then
+    return false;
+  end if;
+
+  delete from public.scan_files where scan_id = p_scan_id;
   update public.scans
   set status = 'queued', worker_id = null, lease_expires_at = null,
     last_heartbeat_at = null, next_attempt_at = greatest(p_next_attempt_at, now()),
@@ -387,13 +408,20 @@ set search_path = ''
 as $$
 declare
   v_updated boolean;
+  v_scan_id uuid;
 begin
-  delete from public.scan_files
-  where scan_id = p_scan_id
-    and exists (
-      select 1 from public.scans
-      where id = p_scan_id and worker_id = p_worker_id and lease_expires_at > now()
-    );
+  select id into v_scan_id
+  from public.scans
+  where id = p_scan_id
+    and worker_id = p_worker_id
+    and status in ('fetching', 'validating', 'extracting', 'parsing', 'persisting')
+    and lease_expires_at > now()
+  for update;
+  if v_scan_id is null then
+    return false;
+  end if;
+
+  delete from public.scan_files where scan_id = p_scan_id;
   update public.scans
   set status = 'failed', worker_id = null, lease_expires_at = null,
     last_heartbeat_at = null, next_attempt_at = null,
