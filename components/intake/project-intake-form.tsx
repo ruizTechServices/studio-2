@@ -81,6 +81,16 @@ function inputClassName(hasError: boolean): string {
   ].join(' ')
 }
 
+function getStatistic(
+  statistics: Readonly<Record<string, unknown>>,
+  key: string
+): number | null {
+  const value = statistics[key]
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : null
+}
+
 export function ProjectIntakeForm() {
   const [repositoryUrl, setRepositoryUrl] = useState('')
   const [ref, setRef] = useState('')
@@ -365,7 +375,7 @@ export function ProjectIntakeForm() {
           <div>
             <h2 className="text-sm font-semibold">Scan status</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Queued scans are processed by the private Phase 2 worker. Source fetching and repository analysis begin in Phase 3.
+              The private worker safely inventories repository file metadata. Source contents are never persisted.
             </p>
           </div>
           {scan ? (
@@ -402,6 +412,26 @@ export function ProjectIntakeForm() {
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">
                     Project <span className="font-mono">{scan.projectId}</span>
                   </p>
+                  {getStatistic(scan.statistics, 'filesDiscovered') !== null ? (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Files discovered:{' '}
+                      <span className="font-medium text-foreground">
+                        {getStatistic(scan.statistics, 'filesDiscovered')}
+                      </span>
+                    </p>
+                  ) : null}
+                  {scan.warnings.length > 0 ? (
+                    <div className="mt-3 text-xs text-amber-700">
+                      <p className="font-medium">
+                        Warnings: {scan.warnings.length}
+                      </p>
+                      <ul className="mt-1 space-y-1">
+                        {scan.warnings.map((warning, index) => (
+                          <li key={`${index}-${warning}`}>{warning}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                   {scan.safeError ? (
                     <p className="mt-3 text-xs text-destructive">
                       {scan.safeError}

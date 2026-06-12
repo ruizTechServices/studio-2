@@ -557,3 +557,47 @@ not been pushed.
 3. Add deterministic JS/TS evidence only after archive safety is verified.
 
 > Last auto-updated: 2026-06-11
+
+---
+
+## PROJECT INTAKE PHASE 3 — 2026-06-12
+
+### Implemented
+
+- Added immutable public GitHub default/named-branch and full-commit-SHA
+  resolution with optional server-only token support.
+- Added bounded trusted-host archive download and streaming hostile tar
+  validation without extracting source files.
+- Added SHA-256 hashing, deterministic text detection, conservative
+  classification, safe statistics, and metadata-only `scan_files` inventory.
+- Added lease-checked stages, inventory batches, cleanup, recurring
+  heartbeats, cancellation, and atomic Phase 3 finalization.
+
+### Safety Boundary
+
+Source contents are never persisted, logged, returned through APIs, or written
+as extracted files. Tags, private repositories, parsing, maps, and AI remain
+deferred.
+
+### Verification
+
+```text
+npm run lint          passed
+npx tsc --noEmit      passed
+npm run test          passed: 29 files, 218 tests
+npm run test:coverage passed: 89.54% statements, 84.64% branches
+npm run build         passed
+git diff --check      passed
+```
+
+Local Supabase startup and clean `supabase db reset` applied every migration,
+including Phase 3. Local schema lint reports no errors. Direct RPC smoke tests
+confirmed claims, stage transitions, inventory clearing/batching, atomic
+finalization, expected-file-count rejection, retry cleanup, and denial of
+direct `service_role` access to `scan_files`.
+
+Linked migration history checks still return 403 because the current account
+lacks the required project privileges, so the migration has not been applied
+to the linked project. Production dependency audit reports the existing
+moderate PostCSS advisory through Next.js; the available automated fix would
+install a breaking, incorrect Next.js version.

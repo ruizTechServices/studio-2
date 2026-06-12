@@ -22,8 +22,8 @@ This is a clean Next.js rebuild of `ruizTechStudio`, starting from a clarified p
 
 ## Current Implementation Status
 
-The deterministic application foundation, local-only Phase 1 intake, and
-private Phase 2 queue/worker foundation are complete:
+The deterministic application foundation and safe Phase 3 GitHub archive
+intake are complete:
 
 - App Router shell, marketing landing page, and dashboard overview
 - Centralized server/client logging with Supabase persistence support
@@ -39,10 +39,13 @@ private Phase 2 queue/worker foundation are complete:
   terminal failure handling
 - Manually-run single-concurrency intake worker with process-once and
   continuous polling modes
+- Public GitHub branch and full-commit-SHA resolution to immutable commits
+- Bounded `tar.gz` download, streaming hostile-archive validation, and
+  metadata-only file inventory
 
-The worker intentionally stops with `phase_3_not_implemented`; it does not
-fetch or scan repositories. The next product milestone is bounded GitHub
-archive intake with hostile-input defenses.
+The worker never persists, logs, or returns source contents. The next product
+milestone is deterministic JavaScript and TypeScript scanning from bounded
+source streams.
 
 ## Getting Started
 
@@ -62,6 +65,7 @@ NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
 PROJECT_INTAKE_ENABLED=true
+GITHUB_TOKEN=                       # optional, rate-limit improvement only
 SCAN_WORKER_ID=
 SCAN_WORKER_LEASE_SECONDS=120
 SCAN_WORKER_MAX_ATTEMPTS=3
@@ -229,4 +233,4 @@ See `docs/IMPLEMENTATION_LOG.md` for the full setup history.
 See `docs/PROJECT-INTAKE.md` for the project intake contract and phased plan.
 See `docs/VISUAL-ASSETS.md` for the implemented visual foundation and adoption guidance.
 
-> Last auto-updated: 2026-06-11
+> Last auto-updated: 2026-06-12

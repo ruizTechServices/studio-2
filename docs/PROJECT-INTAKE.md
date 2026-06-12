@@ -6,7 +6,8 @@ are introduced.
 
 ## Current Status
 
-Phase 1 intake and Phase 2 private queue/worker mechanics are implemented:
+Phase 1 intake, Phase 2 queue mechanics, and Phase 3 safe archive intake are
+implemented:
 
 - `/dashboard/import` validates an exact public GitHub repository URL and an
   optional explicit ref.
@@ -19,16 +20,15 @@ Phase 1 intake and Phase 2 private queue/worker mechanics are implemented:
   safe terminal failures, and support future completion.
 - `public.scan_events` stores immutable claim, heartbeat, retry, failure, and
   completion history.
-- The manually-run Node worker preserves single concurrency and supports
-  process-once and continuous polling modes.
-
-The Phase 2 processor validates metadata only, then marks the scan failed with
-`phase_3_not_implemented`. It does not pretend a repository scan completed.
+- The manually-run Node worker resolves public default/named branches or full
+  commit SHAs, downloads a bounded archive, stream-validates entries, and
+  persists metadata-only file inventory.
 
 ## Safety Boundary
 
-No submitted URL is fetched. No repository archive is downloaded or extracted.
-No source file is parsed. No source code, credentials, tokens, archives,
+No submitted URL is fetched. Trusted GitHub API and codeload URLs are
+constructed internally. Archives are bounded and stream-validated without
+extracting source files. No source code, credentials, tokens, archives,
 detected secrets, environment values, private URLs, or AI prompt source text
 are persisted or logged.
 
@@ -40,6 +40,7 @@ Worker controls and `scan_events` are not exposed through browser APIs.
 PROJECT_INTAKE_ENABLED=true
 NEXT_PUBLIC_SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
+GITHUB_TOKEN= # optional; public-repository rate-limit improvement only
 
 SCAN_WORKER_ID=
 SCAN_WORKER_LEASE_SECONDS=120
@@ -60,7 +61,7 @@ Input:
 ```json
 {
   "repositoryUrl": "https://github.com/owner/repository",
-  "ref": "optional-branch-tag-or-commit"
+  "ref": "optional-branch-or-full-commit-sha"
 }
 ```
 
@@ -95,6 +96,8 @@ Migrations:
 `public.scans` stores immutable scan identity, queue status, attempts, retry
 schedule, lease health, policy limits, safe results, and timestamps.
 `public.scan_events` stores durable worker lifecycle history.
+`public.scan_files` stores metadata-only file inventory. Direct table access is
+revoked; lease-checked service-role RPCs control mutations.
 
 RLS is enabled on all three tables. Public, anon, and authenticated access is
 revoked. Worker RPCs use row ownership checks and are executable only by
@@ -112,8 +115,9 @@ becomes `failed` with safe error fields and emits `failed`. Future real
 processors may use `completed` or `completed_with_warnings` through the
 completion RPC.
 
-The Phase 2 placeholder always ends as `failed` with
-`phase_3_not_implemented`.
+Phase 3 transitions through validating, fetching, extracting, and persisting,
+then completes only after atomic inventory-count verification. Unsafe archives
+and unsupported refs fail with safe path-free errors.
 
 ## Intake Policy Limits
 
@@ -145,15 +149,12 @@ SIGTERM after the current single item finishes.
 
 ## Deferred Phases
 
-1. **Phase 3 safe GitHub archive intake:** hostile-input fixtures, internally
-   constructed GitHub URLs, redirect allowlisting, bounded download/extraction,
-   archive defenses, and file inventory without source persistence.
-2. **JavaScript and TypeScript scanner:** deterministic TypeScript compiler API
+1. **JavaScript and TypeScript scanner:** deterministic TypeScript compiler API
    evidence for files, imports, exports, declarations, routes, APIs, and local
    relationships.
-3. **Ollama summary:** factual summary generated only from persisted,
+2. **Ollama summary:** factual summary generated only from persisted,
    deterministic findings.
-4. **Python and Go adapters:** parser adapters added only after JS/TS scanning
+3. **Python and Go adapters:** parser adapters added only after JS/TS scanning
    is stable.
 
 ## Operations
@@ -162,4 +163,4 @@ Keep local and remote migration history aligned through the Supabase CLI and
 run security/performance advisors after every schema change. Live Supabase and
 GitHub network smoke tests remain outside normal PR CI.
 
-> Last auto-updated: 2026-06-11
+> Last auto-updated: 2026-06-12
