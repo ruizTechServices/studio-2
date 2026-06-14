@@ -741,3 +741,47 @@ migration has not been applied or verified against the linked project.
 - `docs/` inventory (`IMPLEMENTATION_LOG`, `INTAKE-WORKER`, `LOGGING`, `OLLAMA`,
   `PROJECT-INTAKE`, `VISUAL-ASSETS`, `misc/`) matches the documented set.
 - 8 migrations on disk match the documented schema history.
+
+---
+
+## DOCS MAINTENANCE (AUTOMATED SYNC) — 2026-06-14
+
+### Repo State Observed
+
+- `HEAD` is still `1f94339 docs: sync AGENTS.md migration count, log automated
+  run` — the prior automated-sync commit. No new code or doc commits have
+  landed since the 2026-06-12 post-Phase 5 sync.
+- Working tree on branch `codex/phase-5-deterministic-system-map-seed`. The
+  large "modified" set reported by `git status` is CRLF/line-ending noise from
+  the Windows checkout (`git diff --ignore-all-space` is empty); no substantive
+  content changed.
+- Root .md files unchanged: `AGENTS.md`, `README.md`, `CLAUDE.md` (one-line
+  `@AGENTS.md` pointer). `IMPLEMENTATION_LOG.md` remains in `docs/`. No root
+  .md files required migration or moving this run.
+
+### Changed
+
+- `AGENTS.md`: bumped footer to `Last auto-updated: 2026-06-14` (review date).
+  The `Current State (as of 2026-06-12)` header is intentionally retained — it
+  marks the last actual code change (Phase 5), which has not advanced.
+- `README.md`: bumped footer to `Last auto-updated: 2026-06-14`.
+
+### Verified Accurate (no change needed)
+
+- 8 migrations on disk (`...20260612020000_create_phase_5_system_map_seed_read`
+  latest) match the documented schema history and the structure tree count.
+- `lib/intake/system-map/` (build-system-map-seed, classifiers, contracts,
+  formatting + tests) and `components/intake/scan-results/`
+  (scan-results-view, system-map-seed-view + tests) exist as documented.
+- App routes (`api/ai/chat`, `api/ai/health`, `api/log`, `api/projects/import`,
+  `api/scans/[scanId]`, dashboard + scan-results pages, marketing landing)
+  match `AGENTS.md`.
+- `lib/` root clients (`client`, `server`, `middleware`, `utils`),
+  `components/ui/button.tsx`, and `config/{site,navigation}.ts` match.
+- Phase 4/5 read migrations still flagged as not yet applied to the linked
+  Supabase project — no change in that status this run.
+
+### Notes
+
+- No files moved; nothing deleted. README remains setup-only; the `CLAUDE.md`
+  `@AGENTS.md` pointer is intact and is agent config, not status narration.
