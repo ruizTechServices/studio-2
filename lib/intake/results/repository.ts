@@ -6,9 +6,17 @@ import type {
 import { createServiceRoleClient } from '@/lib/server'
 import { buildSystemMapSeed } from '@/lib/intake/system-map/build-system-map-seed'
 import type { SystemMapFileMetadata } from '@/lib/intake/system-map/contracts'
+import {
+  SYMBOL_KINDS,
+  type ScanSymbol,
+  type SymbolSummary,
+} from '@/lib/intake/symbols/contracts'
 
 const CATEGORIES = new Set(['test', 'docs', 'config', 'asset', 'source', 'other'])
 const SYSTEM_MAP_FILE_LIMIT = 20_000
+const SYMBOL_PREVIEW_LIMIT = 25
+const SYMBOL_CONFIDENCES = new Set(['high', 'medium', 'low'])
+const SYMBOL_CATEGORIES = new Set(['dependency', 'declaration', 'routing', 'unknown'])
 
 export class ScanResultsPersistenceError extends Error {
   constructor(
@@ -97,9 +105,42 @@ function parseSystemMapFiles(value: unknown): readonly SystemMapFileMetadata[] |
   return files
 }
 
+function parseSymbolSummary(value: unknown): SymbolSummary | null {
+  if (!isRecord(value) || !isRecord(value.counts) || !Array.isArray(value.preview)) return null
+  if (!Number.isSafeInteger(value.total) || (value.total as number) < 0) return null
+  const counts = {} as Record<(typeof SYMBOL_KINDS)[number], number>
+  for (const kind of SYMBOL_KINDS) {
+    const count = value.counts[kind]
+    if (!Number.isSafeInteger(count) || (count as number) < 0) return null
+    counts[kind] = count as number
+  }
+  if (value.preview.length > SYMBOL_PREVIEW_LIMIT) return null
+  const preview: ScanSymbol[] = []
+  for (const symbol of value.preview) {
+    if (
+      !isRecord(symbol) ||
+      typeof symbol.relativePath !== 'string' ||
+      typeof symbol.kind !== 'string' ||
+      !SYMBOL_KINDS.includes(symbol.kind as (typeof SYMBOL_KINDS)[number]) ||
+      typeof symbol.name !== 'string' ||
+      typeof symbol.exported !== 'boolean' ||
+      !nullableString(symbol.importSource) ||
+      !(symbol.lineStart === null || (Number.isSafeInteger(symbol.lineStart) && (symbol.lineStart as number) >= 1)) ||
+      !(symbol.lineEnd === null || (Number.isSafeInteger(symbol.lineEnd) && (symbol.lineEnd as number) >= 1)) ||
+      typeof symbol.confidence !== 'string' ||
+      !SYMBOL_CONFIDENCES.has(symbol.confidence) ||
+      typeof symbol.category !== 'string' ||
+      !SYMBOL_CATEGORIES.has(symbol.category)
+    ) return null
+    preview.push(symbol as unknown as ScanSymbol)
+  }
+  return { total: value.total as number, counts, preview }
+}
+
 function parseResults(
   value: unknown,
-  systemMapFiles: readonly SystemMapFileMetadata[]
+  systemMapFiles: readonly SystemMapFileMetadata[],
+  symbolSummary: SymbolSummary
 ): ScanResults | null {
   if (!isRecord(value) || !isRecord(value.project) || !isRecord(value.scan)) return null
   const { project, scan } = value
@@ -153,6 +194,7 @@ function parseResults(
     },
     inventoryPreview: preview,
     systemMapSeed: buildSystemMapSeed(scan.id, scan.projectId, systemMapFiles),
+    symbolSummary,
   }
 }
 
@@ -192,7 +234,23 @@ export async function getScanResults(
     )
   }
 
-  const parsed = parseResults(data, systemMapFiles)
+  const symbolResponse = await client.rpc('get_scan_symbol_summary', {
+    p_project_id: projectId,
+    p_scan_id: scanId,
+    p_preview_limit: SYMBOL_PREVIEW_LIMIT,
+  })
+  if (symbolResponse.error) {
+    throw new ScanResultsPersistenceError('database', 'Scan results are unavailable.')
+  }
+  const symbolSummary = parseSymbolSummary(symbolResponse.data)
+  if (symbolSummary === null) {
+    throw new ScanResultsPersistenceError(
+      'invalid_response',
+      'Scan results returned an invalid response.'
+    )
+  }
+
+  const parsed = parseResults(data, systemMapFiles, symbolSummary)
   if (!parsed || parsed.project.id !== projectId || parsed.scan.id !== scanId) {
     throw new ScanResultsPersistenceError(
       'invalid_response',

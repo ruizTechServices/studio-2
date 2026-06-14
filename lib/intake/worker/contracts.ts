@@ -1,5 +1,6 @@
 import type { TerminalScanStatus } from '@/lib/intake/contracts'
 import type { ScanFileInventory } from '@/lib/intake/archive/contracts'
+import type { ScanSymbol } from '@/lib/intake/symbols/contracts'
 
 export interface WorkerConfig {
   readonly workerId: string
@@ -34,6 +35,7 @@ export interface ScanCompletion {
   readonly resolvedRef: string
   readonly sourceCommitSha: string
   readonly expectedFileCount: number
+  readonly expectedSymbolCount: number
 }
 
 export interface ScanProcessorContext {
@@ -64,6 +66,11 @@ export interface ScanWorkerRepository {
     scanId: string,
     workerId: string,
     files: readonly ScanFileInventory[]
+  ): Promise<boolean>
+  persistScanSymbolsBatch(
+    scanId: string,
+    workerId: string,
+    symbols: readonly ScanSymbol[]
   ): Promise<boolean>
   releaseScanForRetry(
     scanId: string,

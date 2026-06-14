@@ -17,6 +17,8 @@ import type {
   ScanFileInventory,
 } from '@/lib/intake/archive/contracts'
 import { WorkerFailure } from '@/lib/intake/worker/failures'
+import { extractSymbols, isSymbolCandidate } from '@/lib/intake/symbols/extract'
+import type { ScanSymbol } from '@/lib/intake/symbols/contracts'
 
 const SAMPLE_BYTES = 8 * 1024
 const DRIVE_PATH = /^[A-Za-z]:/
@@ -89,12 +91,14 @@ function processFileEntry(
   policy: ArchivePolicy,
   getTotalBytes: () => number,
   addTotalBytes: (bytes: number) => void
-): Promise<ScanFileInventory> {
+): Promise<{ file: ScanFileInventory; symbols: readonly ScanSymbol[] }> {
   return new Promise((resolve, reject) => {
     const hash = createHash('sha256')
     const samples: Buffer[] = []
     let sampleLength = 0
     let size = 0
+    const sourceChunks: Buffer[] = []
+    const candidate = isSymbolCandidate(relativePath)
 
     stream.on('data', (chunk: Buffer) => {
       size += chunk.length
@@ -109,6 +113,7 @@ function processFileEntry(
         return
       }
       hash.update(chunk)
+      if (candidate && size <= policy.parsedTextFileMaxBytes) sourceChunks.push(chunk)
       if (sampleLength < SAMPLE_BYTES) {
         const sample = chunk.subarray(0, SAMPLE_BYTES - sampleLength)
         samples.push(sample)
@@ -129,16 +134,31 @@ function processFileEntry(
       }
       const extension = getExtension(name)
       const language = getLanguage(extension)
+      const isText = detectText(Buffer.concat(samples), size)
+      let symbols: readonly ScanSymbol[] = []
+      if (candidate && isText && size <= policy.parsedTextFileMaxBytes) {
+        try {
+          symbols = extractSymbols(
+            relativePath,
+            new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(sourceChunks))
+          )
+        } catch {
+          symbols = []
+        }
+      }
       resolve({
-        relativePath,
-        name,
-        extension,
-        language,
-        category: getCategory(relativePath, name, extension, language),
-        sizeBytes: size,
-        depth: segments.length,
-        isText: detectText(Buffer.concat(samples), size),
-        contentHash: hash.digest('hex'),
+        file: {
+          relativePath,
+          name,
+          extension,
+          language,
+          category: getCategory(relativePath, name, extension, language),
+          sizeBytes: size,
+          depth: segments.length,
+          isText,
+          contentHash: hash.digest('hex'),
+        },
+        symbols,
       })
     })
   })
@@ -153,6 +173,7 @@ export async function inventoryArchive(
   const gunzip = createGunzip()
   const input = createReadStream(archivePath)
   const files: ScanFileInventory[] = []
+  const symbols: ScanSymbol[] = []
   const seen = new Set<string>()
   let root: string | null = null
   let entries = 0
@@ -200,8 +221,7 @@ export async function inventoryArchive(
           stream.resume()
           return
         }
-        files.push(
-          await processFileEntry(
+        const processed = await processFileEntry(
             stream,
             header,
             parsed.relativePath,
@@ -212,7 +232,15 @@ export async function inventoryArchive(
               totalBytes += bytes
             }
           )
-        )
+        if (symbols.length + processed.symbols.length > policy.symbolsMax) {
+          throw new WorkerFailure(
+            'symbol_limit_exceeded',
+            'Repository exceeds the symbol metadata limit.',
+            false
+          )
+        }
+        files.push(processed.file)
+        symbols.push(...processed.symbols)
       })
       .then(() => next())
       .catch((error: unknown) => {
@@ -266,6 +294,7 @@ export async function inventoryArchive(
 
   return {
     files,
+    symbols,
     statistics: {
       filesDiscovered: files.length,
       textFiles,

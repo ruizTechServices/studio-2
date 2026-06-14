@@ -59,6 +59,24 @@ function results(overrides: Partial<ScanResults['scan']> = {}): ScanResults {
         isText: true,
       },
     ]),
+    symbolSummary: {
+      total: 1,
+      counts: {
+        import: 0, export: 0, function: 0, component: 0, hook: 0,
+        api_handler: 0, type: 0, constant: 1, unknown: 0,
+      },
+      preview: [{
+        relativePath: 'src/index.ts',
+        kind: 'constant',
+        name: 'value',
+        exported: true,
+        importSource: null,
+        lineStart: 1,
+        lineEnd: 1,
+        confidence: 'high',
+        category: 'declaration',
+      }],
+    },
   }
 }
 
@@ -69,6 +87,7 @@ describe('ScanResultsView', () => {
     expect(html).toContain('Files discovered')
     expect(html).toContain('src/index.ts')
     expect(html).toContain('TypeScript')
+    expect(html).toContain('Symbol Summary')
     expect(html).not.toContain('contentHash')
     expect(html).not.toContain('console.log("secret source")')
   })

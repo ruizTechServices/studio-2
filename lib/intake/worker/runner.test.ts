@@ -49,6 +49,7 @@ function createRepository(
     transitionScanStage: vi.fn().mockResolvedValue(true),
     beginScanInventory: vi.fn().mockResolvedValue(true),
     persistScanFilesBatch: vi.fn().mockResolvedValue(true),
+    persistScanSymbolsBatch: vi.fn().mockResolvedValue(true),
     releaseScanForRetry: vi.fn().mockResolvedValue(true),
     failScan: vi.fn().mockResolvedValue(true),
     completeScan: vi.fn().mockResolvedValue(true),
@@ -85,6 +86,7 @@ describe('runWorkerOnce', () => {
       resolvedRef: 'main',
       sourceCommitSha: 'a'.repeat(40),
       expectedFileCount: 0,
+      expectedSymbolCount: 0,
     }
 
     await expect(

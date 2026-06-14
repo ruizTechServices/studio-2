@@ -93,6 +93,15 @@ export async function processPhase3Archive(
         )
       )
     }
+    for (let index = 0; index < inventory.symbols.length; index += 500) {
+      await requireLease(
+        context.repository.persistScanSymbolsBatch(
+          claim.scanId,
+          context.workerId,
+          inventory.symbols.slice(index, index + 500)
+        )
+      )
+    }
 
     return {
       status:
@@ -104,6 +113,7 @@ export async function processPhase3Archive(
       resolvedRef: source.resolvedRef,
       sourceCommitSha: source.commitSha,
       expectedFileCount: inventory.files.length,
+      expectedSymbolCount: inventory.symbols.length,
     }
   } finally {
     if (temporaryDirectory) {

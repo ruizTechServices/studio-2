@@ -9,6 +9,7 @@ import {
 import Link from 'next/link'
 
 import { SystemMapSeedView } from '@/components/intake/scan-results/system-map-seed-view'
+import { SymbolSummaryView } from '@/components/intake/scan-results/symbol-summary-view'
 import type { ScanResults } from '@/lib/intake/results/contracts'
 import {
   formatBytes,
@@ -229,6 +230,8 @@ export function ScanResultsView({ results }: Readonly<{ results: ScanResults }>)
       </section>
 
       <SystemMapSeedView seed={results.systemMapSeed} />
+
+      <SymbolSummaryView summary={results.symbolSummary} />
 
       <InventoryPreview results={results} />
     </div>
