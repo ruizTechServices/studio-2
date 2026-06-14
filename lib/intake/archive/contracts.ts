@@ -6,6 +6,7 @@ export interface ArchivePolicy {
   readonly pathMaxCharacters: number
   readonly directoryDepthMax: number
   readonly scanDurationMaxMinutes: number
+  readonly symbolsMax: number
 }
 
 export type FileCategory =
@@ -40,6 +41,7 @@ export interface ScanStatistics {
 
 export interface ArchiveInventoryResult {
   readonly files: readonly ScanFileInventory[]
+  readonly symbols: readonly import('@/lib/intake/symbols/contracts').ScanSymbol[]
   readonly statistics: ScanStatistics
   readonly warnings: readonly string[]
 }

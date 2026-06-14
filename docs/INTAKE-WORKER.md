@@ -1,8 +1,8 @@
 # Intake Worker
 
 The private, manually-run, single-concurrency Node worker combines durable
-queue mechanics with Phase 3 safe public GitHub archive intake. It inventories
-file metadata without persisting or extracting source files.
+queue mechanics with safe public GitHub archive intake and deterministic
+JS/TS symbol scanning. It never persists or extracts source files.
 
 ## Run Commands
 
@@ -56,6 +56,8 @@ concurrency is fixed at one.
    archive, stream-validates it, and writes inventory in lease-checked batches.
 9. Atomic finalization verifies the expected inventory count before emitting
    `completed` or `completed_with_warnings`.
+10. Bounded JS/TS/JSX/TSX source is parsed in memory, metadata-only symbols are
+    persisted in lease-checked batches, and finalization verifies symbol count.
 
 ## Security
 
@@ -66,7 +68,8 @@ concurrency is fixed at one.
 - Logs contain scan IDs, worker IDs, attempt counts, and safe error codes only.
 - Source contents, secrets, tokens, environment values, archives, paths,
   filenames, and private URLs must never be logged by the worker.
-- Source contents and archives are never persisted. Repository-relative paths
+- Source contents and archives are never persisted. Parse buffers are discarded
+  after deterministic extraction. Repository-relative paths
   are persisted only as private inventory metadata.
 
 ## Supported Source References
@@ -77,10 +80,7 @@ rejected without calling GitHub tag endpoints.
 
 ## Next Milestone
 
-Add deterministic JavaScript and TypeScript scanning without weakening the
-Phase 3 metadata-only persistence boundary. Phase 5 now supplies the first
-MVP-aligned system-map seed from inventory metadata only; deeper relationships,
-source parsing, graph visualization, AI, and reusable asset extraction remain
-deferred.
+Keep deeper relationships, graph visualization, AI, and reusable asset
+extraction deferred until deterministic JS/TS symbol evidence is stable.
 
 > Last auto-updated: 2026-06-12

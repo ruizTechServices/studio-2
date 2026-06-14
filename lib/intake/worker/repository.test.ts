@@ -129,4 +129,30 @@ describe('scanWorkerRepository', () => {
       p_safe_error_message: 'Safe failure.',
     })
   })
+
+  it('persists metadata-only symbol batches through the service-role RPC', async () => {
+    mocks.rpc.mockResolvedValue({ data: true, error: null })
+    const symbols = [
+      {
+        relativePath: 'src/index.ts',
+        kind: 'function' as const,
+        name: 'run',
+        exported: true,
+        importSource: null,
+        lineStart: 1,
+        lineEnd: 1,
+        confidence: 'high' as const,
+        category: 'declaration' as const,
+      },
+    ]
+
+    await expect(
+      scanWorkerRepository.persistScanSymbolsBatch(SCAN_ID, 'worker-1', symbols)
+    ).resolves.toBe(true)
+    expect(mocks.rpc).toHaveBeenCalledWith('persist_scan_symbols_batch', {
+      p_scan_id: SCAN_ID,
+      p_worker_id: 'worker-1',
+      p_symbols: symbols,
+    })
+  })
 })

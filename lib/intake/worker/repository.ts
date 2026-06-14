@@ -143,6 +143,14 @@ export const scanWorkerRepository: ScanWorkerRepository = {
     })
   },
 
+  persistScanSymbolsBatch(scanId, workerId, symbols) {
+    return callBooleanRpc('persist_scan_symbols_batch', {
+      p_scan_id: scanId,
+      p_worker_id: workerId,
+      p_symbols: symbols,
+    })
+  },
+
   releaseScanForRetry(scanId, workerId, nextAttemptAt, failure) {
     return callBooleanRpc('release_scan_for_retry', {
       p_scan_id: scanId,
@@ -163,7 +171,7 @@ export const scanWorkerRepository: ScanWorkerRepository = {
   },
 
   completeScan(scanId, workerId, completion: ScanCompletion) {
-    return callBooleanRpc('finalize_phase_3_scan', {
+    return callBooleanRpc('finalize_phase_6_scan', {
       p_scan_id: scanId,
       p_project_id: completion.projectId,
       p_worker_id: workerId,
@@ -172,6 +180,7 @@ export const scanWorkerRepository: ScanWorkerRepository = {
       p_resolved_ref: completion.resolvedRef,
       p_source_commit_sha: completion.sourceCommitSha,
       p_expected_file_count: completion.expectedFileCount,
+      p_expected_symbol_count: completion.expectedSymbolCount,
       p_statistics: completion.statistics,
       p_warnings: completion.warnings,
     })

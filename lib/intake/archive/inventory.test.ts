@@ -18,6 +18,7 @@ const policy = {
   pathMaxCharacters: INTAKE_RESOURCE_LIMITS.pathMaxCharacters,
   directoryDepthMax: INTAKE_RESOURCE_LIMITS.directoryDepthMax,
   scanDurationMaxMinutes: INTAKE_RESOURCE_LIMITS.scanDurationMaxMinutes,
+  symbolsMax: INTAKE_RESOURCE_LIMITS.symbolsMax,
 }
 
 async function archive(
@@ -76,6 +77,11 @@ describe('inventoryArchive', () => {
       isText: true,
     })
     expect(result.files[0].contentHash).toMatch(/^[0-9a-f]{64}$/)
+    expect(result.symbols).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'constant', name: 'value', exported: true }),
+      ])
+    )
   })
 
   it.each([

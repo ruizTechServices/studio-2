@@ -785,3 +785,22 @@ migration has not been applied or verified against the linked project.
 
 - No files moved; nothing deleted. README remains setup-only; the `CLAUDE.md`
   `@AGENTS.md` pointer is intact and is agent config, not status narration.
+
+---
+
+## DETERMINISTIC JS/TS SYMBOL SCANNING PHASE 6 — 2026-06-14
+
+### Implemented
+
+- Added TypeScript-compiler-API extraction for bounded JS/TS/JSX/TSX files,
+  including imports, exports, functions, components, hooks, API handlers,
+  types, and constants.
+- Kept source in bounded worker memory only and persisted private metadata-only
+  symbol rows through lease-checked batches and atomic count verification.
+- Added a service-role-only bounded symbol-summary read path and compact scan
+  results section.
+
+### Intentional Boundary
+
+Phase 6 does not persist source code or add AI, embeddings, relationships,
+automatic refactoring, reusable asset extraction, or graph-canvas work.

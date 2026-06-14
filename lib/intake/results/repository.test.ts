@@ -60,15 +60,42 @@ const validSystemMapFiles = [
   },
 ]
 
+const validSymbolSummary = {
+  total: 1,
+  counts: {
+    import: 0,
+    export: 1,
+    function: 0,
+    component: 0,
+    hook: 0,
+    api_handler: 0,
+    type: 0,
+    constant: 0,
+    unknown: 0,
+  },
+  preview: [{
+    relativePath: 'src/index.ts',
+    kind: 'export',
+    name: 'value',
+    exported: true,
+    importSource: null,
+    lineStart: 1,
+    lineEnd: 1,
+    confidence: 'high',
+    category: 'declaration',
+  }],
+}
+
 beforeEach(() => {
   mocks.createServiceRoleClient.mockReturnValue({ rpc: mocks.rpc })
-  mocks.rpc.mockImplementation((name: string) =>
-    Promise.resolve(
-      name === 'get_scan_results'
-        ? { data: validResult, error: null }
-        : { data: validSystemMapFiles, error: null }
-    )
-  )
+  mocks.rpc.mockImplementation((name: string) => Promise.resolve({
+    data: name === 'get_scan_results'
+      ? validResult
+      : name === 'get_scan_system_map_files'
+        ? validSystemMapFiles
+        : validSymbolSummary,
+    error: null,
+  }))
 })
 
 describe('getScanResults', () => {
@@ -81,6 +108,7 @@ describe('getScanResults', () => {
       generatedFrom: 'metadata_only',
       counts: { sourceModules: 1 },
     })
+    expect(results?.symbolSummary).toEqual(validSymbolSummary)
     expect(mocks.rpc).toHaveBeenCalledWith('get_scan_results', {
       p_project_id: PROJECT_ID,
       p_scan_id: SCAN_ID,
@@ -89,6 +117,11 @@ describe('getScanResults', () => {
     expect(mocks.rpc).toHaveBeenCalledWith('get_scan_system_map_files', {
       p_project_id: PROJECT_ID,
       p_scan_id: SCAN_ID,
+    })
+    expect(mocks.rpc).toHaveBeenCalledWith('get_scan_symbol_summary', {
+      p_project_id: PROJECT_ID,
+      p_scan_id: SCAN_ID,
+      p_preview_limit: 25,
     })
     expect(JSON.stringify(results)).not.toContain('contentHash')
   })
@@ -120,6 +153,16 @@ describe('getScanResults', () => {
     mocks.rpc
       .mockResolvedValueOnce({ data: validResult, error: null })
       .mockResolvedValueOnce({ data: [{ relativePath: 'missing-required-fields' }], error: null })
+    await expect(getScanResults(PROJECT_ID, SCAN_ID)).rejects.toMatchObject({
+      code: 'invalid_response',
+    })
+  })
+
+  it('rejects malformed symbol metadata safely', async () => {
+    mocks.rpc
+      .mockResolvedValueOnce({ data: validResult, error: null })
+      .mockResolvedValueOnce({ data: validSystemMapFiles, error: null })
+      .mockResolvedValueOnce({ data: { ...validSymbolSummary, preview: Array(26).fill(validSymbolSummary.preview[0]) }, error: null })
     await expect(getScanResults(PROJECT_ID, SCAN_ID)).rejects.toMatchObject({
       code: 'invalid_response',
     })

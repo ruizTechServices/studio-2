@@ -34,6 +34,7 @@ function repository(): ScanWorkerRepository {
     transitionScanStage: vi.fn().mockResolvedValue(true),
     beginScanInventory: vi.fn().mockResolvedValue(true),
     persistScanFilesBatch: vi.fn().mockResolvedValue(true),
+    persistScanSymbolsBatch: vi.fn().mockResolvedValue(true),
     releaseScanForRetry: vi.fn(),
     failScan: vi.fn(),
     completeScan: vi.fn(),
@@ -89,12 +90,23 @@ describe('processPhase3Archive', () => {
     ).resolves.toMatchObject({
       status: 'completed',
       expectedFileCount: 1,
+      expectedSymbolCount: 2,
       sourceCommitSha: sha,
     })
     expect(persistence.persistScanFilesBatch).toHaveBeenCalledWith(
       scanId,
       'worker-1',
       [expect.objectContaining({ relativePath: 'file.ts' })]
+    )
+    expect(persistence.persistScanSymbolsBatch).toHaveBeenCalledWith(
+      scanId,
+      'worker-1',
+      expect.arrayContaining([
+        expect.objectContaining({ relativePath: 'file.ts', name: 'value' }),
+      ])
+    )
+    expect(JSON.stringify(vi.mocked(persistence.persistScanSymbolsBatch).mock.calls)).not.toContain(
+      'export const value = 1'
     )
     expect(await leftovers()).toEqual([])
   })

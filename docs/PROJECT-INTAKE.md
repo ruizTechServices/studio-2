@@ -7,8 +7,8 @@ are introduced.
 ## Current Status
 
 Phase 1 intake, Phase 2 queue mechanics, Phase 3 safe archive intake, Phase 4
-deterministic results view, and the Phase 5 metadata-only system-map seed are
-implemented:
+deterministic results view, the Phase 5 metadata-only system-map seed, and
+Phase 6 deterministic JS/TS symbol scanning are implemented:
 
 - `/dashboard/import` validates an exact public GitHub repository URL and an
   optional explicit ref.
@@ -29,12 +29,16 @@ implemented:
 - The results read model derives a stable, bounded structure seed that groups
   routes, pages, endpoints, components, tests, docs, config, assets, styles,
   database files, scripts, source modules, and other files.
+- Bounded JS/TS/JSX/TSX files are parsed during worker processing and only
+  deterministic import, export, declaration, component, hook, and API-handler
+  metadata is persisted.
 
 ## Safety Boundary
 
 No submitted URL is fetched. Trusted GitHub API and codeload URLs are
 constructed internally. Archives are bounded and stream-validated without
-extracting source files. No source code, credentials, tokens, archives,
+extracting source files. Parseable JS/TS source exists only in bounded worker
+memory and is discarded after metadata extraction. No source code, credentials, tokens, archives,
 detected secrets, environment values, private URLs, or AI prompt source text
 are persisted or logged.
 
@@ -97,6 +101,7 @@ Displays project identity, refs, commit SHA, statistics, warnings, safe errors,
 language/category counts, and at most 50 metadata-only inventory rows. It never
 returns or displays source contents or content hashes. It also renders the
 first compact MVP system overview from deterministic metadata-only groups.
+It also renders bounded symbol counts and a compact metadata-only preview.
 
 ## Database Model
 
@@ -108,6 +113,7 @@ Migrations:
 - `supabase/migrations/20260612000000_create_phase_3_archive_intake.sql`
 - `supabase/migrations/20260612010000_create_phase_4_scan_results_read.sql`
 - `supabase/migrations/20260612020000_create_phase_5_system_map_seed_read.sql`
+- `supabase/migrations/20260614000000_create_phase_6_symbol_scanning.sql`
 
 `public.projects` stores normalized public GitHub repository identity.
 `public.scans` stores immutable scan identity, queue status, attempts, retry
@@ -119,6 +125,8 @@ revoked; lease-checked service-role RPCs control mutations.
 project/scan pair and returns a bounded metadata-only preview.
 `get_scan_system_map_files` verifies the project/scan pair and returns only the
 private inventory metadata required to derive the bounded system-map seed.
+`public.scan_symbols` stores private metadata-only deterministic findings.
+`get_scan_symbol_summary` returns service-role-only bounded counts and preview.
 
 RLS is enabled on all intake tables. Public, anon, and authenticated access is
 revoked. Worker RPCs use row ownership checks and are executable only by
@@ -170,12 +178,9 @@ SIGTERM after the current single item finishes.
 
 ## Deferred Phases
 
-1. **JavaScript and TypeScript scanner:** deterministic TypeScript compiler API
-   evidence for files, imports, exports, declarations, routes, APIs, and local
-   relationships.
-2. **Ollama summary:** factual summary generated only from persisted,
+1. **Ollama summary:** factual summary generated only from persisted,
    deterministic findings.
-3. **Python and Go adapters:** parser adapters added only after JS/TS scanning
+2. **Python and Go adapters:** parser adapters added only after JS/TS scanning
    is stable.
 
 ## Operations

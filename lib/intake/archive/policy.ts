@@ -10,6 +10,7 @@ const POLICY_KEYS = [
   'pathMaxCharacters',
   'directoryDepthMax',
   'scanDurationMaxMinutes',
+  'symbolsMax',
 ] as const satisfies readonly (keyof ArchivePolicy)[]
 
 const HARD_POLICY: ArchivePolicy = {
@@ -20,6 +21,7 @@ const HARD_POLICY: ArchivePolicy = {
   pathMaxCharacters: INTAKE_RESOURCE_LIMITS.pathMaxCharacters,
   directoryDepthMax: INTAKE_RESOURCE_LIMITS.directoryDepthMax,
   scanDurationMaxMinutes: INTAKE_RESOURCE_LIMITS.scanDurationMaxMinutes,
+  symbolsMax: INTAKE_RESOURCE_LIMITS.symbolsMax,
 }
 
 export function parseArchivePolicy(
