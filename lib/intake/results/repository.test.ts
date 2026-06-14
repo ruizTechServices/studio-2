@@ -47,31 +47,59 @@ const validResult = {
   ],
 }
 
+const validSystemMapFiles = [
+  {
+    relativePath: 'src/index.ts',
+    name: 'index.ts',
+    extension: 'ts',
+    language: 'TypeScript',
+    category: 'source',
+    sizeBytes: 100,
+    depth: 2,
+    isText: true,
+  },
+]
+
 beforeEach(() => {
   mocks.createServiceRoleClient.mockReturnValue({ rpc: mocks.rpc })
-  mocks.rpc.mockResolvedValue({ data: validResult, error: null })
+  mocks.rpc.mockImplementation((name: string) =>
+    Promise.resolve(
+      name === 'get_scan_results'
+        ? { data: validResult, error: null }
+        : { data: validSystemMapFiles, error: null }
+    )
+  )
 })
 
 describe('getScanResults', () => {
   it('loads the bounded metadata-only read model through the RPC', async () => {
-    await expect(getScanResults(PROJECT_ID, SCAN_ID)).resolves.toEqual(validResult)
+    const results = await getScanResults(PROJECT_ID, SCAN_ID)
+    expect(results).toMatchObject(validResult)
+    expect(results?.systemMapSeed).toMatchObject({
+      scanId: SCAN_ID,
+      projectId: PROJECT_ID,
+      generatedFrom: 'metadata_only',
+      counts: { sourceModules: 1 },
+    })
     expect(mocks.rpc).toHaveBeenCalledWith('get_scan_results', {
       p_project_id: PROJECT_ID,
       p_scan_id: SCAN_ID,
       p_preview_limit: 50,
     })
-    expect(JSON.stringify(await getScanResults(PROJECT_ID, SCAN_ID))).not.toContain(
-      'contentHash'
-    )
+    expect(mocks.rpc).toHaveBeenCalledWith('get_scan_system_map_files', {
+      p_project_id: PROJECT_ID,
+      p_scan_id: SCAN_ID,
+    })
+    expect(JSON.stringify(results)).not.toContain('contentHash')
   })
 
   it('returns null for a missing project/scan pair', async () => {
-    mocks.rpc.mockResolvedValue({ data: null, error: null })
+    mocks.rpc.mockResolvedValueOnce({ data: null, error: null })
     await expect(getScanResults(PROJECT_ID, SCAN_ID)).resolves.toBeNull()
   })
 
   it('rejects malformed and over-limit inventory responses', async () => {
-    mocks.rpc.mockResolvedValue({
+    mocks.rpc.mockResolvedValueOnce({
       data: { ...validResult, inventoryPreview: Array(51).fill(validResult.inventoryPreview[0]) },
       error: null,
     })
@@ -81,10 +109,19 @@ describe('getScanResults', () => {
   })
 
   it('returns a safe persistence failure', async () => {
-    mocks.rpc.mockResolvedValue({ data: null, error: { message: 'database secret' } })
+    mocks.rpc.mockResolvedValueOnce({ data: null, error: { message: 'database secret' } })
     await expect(getScanResults(PROJECT_ID, SCAN_ID)).rejects.toMatchObject({
       code: 'database',
       message: 'Scan results are unavailable.',
+    })
+  })
+
+  it('rejects malformed system map metadata safely', async () => {
+    mocks.rpc
+      .mockResolvedValueOnce({ data: validResult, error: null })
+      .mockResolvedValueOnce({ data: [{ relativePath: 'missing-required-fields' }], error: null })
+    await expect(getScanResults(PROJECT_ID, SCAN_ID)).rejects.toMatchObject({
+      code: 'invalid_response',
     })
   })
 })

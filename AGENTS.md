@@ -12,7 +12,7 @@ This is a **codebase intelligence studio** — not a generic SaaS app. The produ
 
 ## Current State (as of 2026-06-12)
 
-Branch: `codex/phase-4-scan-results-view` (on top of merged Phase 3). The v0 app shell, Ollama integration, marketing surface, visual asset foundation, Phase 3 safe GitHub archive intake, and Phase 4 deterministic scan results view are complete and locally verified (232 tests passing, ~90% statement coverage). Deterministic source scanning has not started. The Phase 4 migration and read RPC are locally verified but **not yet applied to the linked Supabase project**.
+Branch: `codex/phase-5-deterministic-system-map-seed` (on top of merged Phase 4). Phase 5 adds the first MVP-aligned deterministic system-map seed from metadata-only scan inventory. Source parsing, AI summaries, embeddings, graph visualization, and reusable asset extraction have not started. Phase 4 and Phase 5 read migrations are **not yet applied to the linked Supabase project**.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -49,6 +49,8 @@ Completed since initial scaffold:
 - `lib/intake/results/` + `components/intake/scan-results/` — validated metadata-only results read model and dashboard presentation (Phase 4)
 - `app/dashboard/projects/[projectId]/scans/[scanId]/page.tsx` — server-rendered deterministic scan results route
 - `supabase/migrations/20260612010000_create_phase_4_scan_results_read.sql` — bounded service-role-only results read RPC
+- `lib/intake/system-map/` + `components/intake/scan-results/system-map-seed-view.tsx` — deterministic metadata-only structure seed and compact overview (Phase 5)
+- `supabase/migrations/20260612020000_create_phase_5_system_map_seed_read.sql` — service-role-only metadata read for system-map seed generation
 
 ## Tech Stack
 
@@ -111,8 +113,9 @@ studio-2/
 │   └── utils.ts                    # cn() utility
 ├── scripts/intake-worker.ts        # CLI entry — worker:intake / worker:intake:once
 ├── supabase/
-│   ├── migrations/                 # 7 migrations: logs, intake foundation, grants,
-│   │                               # worker foundation, claim fix, phase 3 archive, phase 4 read
+│   ├── migrations/                 # 8 migrations: logs, intake foundation, grants,
+│   │                               # worker foundation, claim fix, phase 3 archive,
+│   │                               # phase 4 read, phase 5 system-map seed read
 │   └── sql/enable_logs_retention.sql # pg_cron daily purge (logs > 30d) — opt-in
 ├── docs/                           # IMPLEMENTATION_LOG, INTAKE-WORKER, LOGGING, OLLAMA,
 │                                   # PROJECT-INTAKE, VISUAL-ASSETS, misc/
@@ -129,7 +132,7 @@ studio-2/
 - **Logging**: always use `lib/logger/server.ts` on the server, `lib/logger/client.ts` on the client. Never import server logger into Client Components. See `docs/LOGGING.md`.
 - **AI**: never call Ollama directly from route handlers. Use `lib/ai/ollama-client.ts` (`chatWithOllama`, `getOllamaModels`). Validate requests with `lib/ai/model-policy.ts` first. Build the message array with `lib/ai/context-builder.ts`. See `docs/OLLAMA.md`.
 - **Project intake**: intake is local-only and production-hidden. Validate through `lib/intake/`, never fetch submitted URLs directly, never expose service-role access to clients, and never persist or log source contents. See `docs/PROJECT-INTAKE.md`.
-- **Scan results**: Phase 4 displays deterministic metadata only — no source contents, hashes, parsing, system maps, AI, embeddings, or asset extraction. Read through `lib/intake/results/` only.
+- **Scan results and system-map seed**: Phase 5 derives a compact deterministic structure model from private `scan_files` metadata only. No source contents, parsing, graph canvas, AI, embeddings, or asset extraction. Read through `lib/intake/results/` and build through `lib/intake/system-map/`.
 - **Config**: site metadata → `config/site.ts` (`siteConfig`). Dashboard nav items → `config/navigation.ts` (`dashboardNavigation`).
 - **Visual assets**: use `BrandLogo` for in-product branding (static light/dark variants only when assets leave the application), static assets from `public/brand/` and `public/illustrations/`, and reusable motion from `components/animations/` — no one-off motion for feature pages. All motion must respect `prefers-reduced-motion`. Meaningful images require useful alt text; decorative animations must be hidden from assistive technology. See `docs/VISUAL-ASSETS.md`.
 - **Testing**: Vitest (`npm run test`). Test files co-located with source (`.test.ts`). Coverage via `npm run test:coverage`.
@@ -150,10 +153,10 @@ The studio is a tool developers use when inheriting, recovering, or deeply under
 
 ## Next Steps (in order)
 
-1. Apply the Phase 4 migration (`20260612010000_create_phase_4_scan_results_read.sql`) to the linked Supabase project and run advisors.
+1. Apply the Phase 4 and Phase 5 read migrations to the linked Supabase project and run advisors.
 2. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
 3. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
-4. Add deterministic JS/TS scanning before system-map, reusable-asset, status-summary, or AI-summary work.
+4. Add deterministic JS/TS scanning before deeper system-map relationships, reusable-asset, status-summary, or AI-summary work.
 
 ## Environment Variables
 
@@ -178,4 +181,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-12
+> Last auto-updated: 2026-06-14

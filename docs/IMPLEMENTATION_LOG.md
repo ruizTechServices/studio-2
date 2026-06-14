@@ -666,3 +666,122 @@ applied to the linked Supabase project.
 - Root .md files: `AGENTS.md`, `README.md`, `CLAUDE.md` (pointer to
   AGENTS.md). `IMPLEMENTATION_LOG.md` already lives in `docs/`. No root files
   required moving to `docs/`.
+
+---
+
+## DETERMINISTIC SYSTEM MAP SEED PHASE 5 — 2026-06-12
+
+### Implemented
+
+- Added conservative metadata-only classifiers for routes, pages, API
+  endpoints, components, tests, docs, config, assets, styles, database files,
+  scripts, source modules, and other files.
+- Added a stable system-map seed contract with complete group counts, bounded
+  previews, top-level directories, deterministic framework hints, structural
+  flags, and bounded largest-file metadata.
+- Extended the Phase 4 read model and results page with a compact deterministic
+  system overview.
+- Added a read-only, service-role-only RPC that returns only the private
+  `scan_files` metadata required to generate the seed.
+
+### Intentional Boundary
+
+Phase 5 is the first MVP system-map foundation, not the final graph. It does
+not parse, persist, display, or log source contents and does not add AI,
+embeddings, reusable asset extraction, graph canvas, or file browsing.
+
+### Verification
+
+```text
+supabase db reset     passed; all migrations applied locally
+supabase db lint      passed; no schema errors
+supabase db advisors  passed; no local issues
+local Phase 5 RPC     passed; approved metadata only, anon/authenticated denied
+npm run lint          passed
+npx tsc --noEmit      passed
+npm run test          passed: 37 files, 243 tests
+npm run test:coverage passed: 90.47% statements, 86.69% branches
+npm run build         passed
+git diff --check      passed
+hidden Unicode scan   passed
+```
+
+The linked Supabase migration check still returns HTTP 403, so the Phase 5
+migration has not been applied or verified against the linked project.
+
+---
+
+## DOCS MAINTENANCE (AUTOMATED SYNC) — 2026-06-12 (post-Phase 5)
+
+### Repo State Observed
+
+- Latest commit `60909de feat: add phase 5 deterministic system map seed`, on
+  top of merged Phase 4 (PR #4, `d30fb97`) and Phase 3 (PR #3, `8055a3e`).
+- Working tree resides on branch `codex/phase-5-deterministic-system-map-seed`.
+- Root .md files: `AGENTS.md`, `README.md`, `CLAUDE.md` (one-line pointer to
+  `AGENTS.md`). `IMPLEMENTATION_LOG.md` already lives in `docs/`. No root .md
+  files required migration or moving this run.
+- Canonical docs were already current as of the Phase 5 commit: `AGENTS.md`
+  reflects Phase 5 status and the deterministic system-map seed module;
+  `README.md` is setup-only with a status pointer; `IMPLEMENTATION_LOG.md`
+  carries the Phase 5 entry.
+
+### Changed
+
+- `AGENTS.md`: corrected the project-structure tree's Supabase migrations
+  comment from "7 migrations" to "8 migrations" and added the Phase 5
+  `20260612020000_create_phase_5_system_map_seed_read.sql` read migration,
+  which the tree had omitted (the Completed list already referenced it).
+
+### Verified Accurate (no change needed)
+
+- Codebase structure in `AGENTS.md` matches the actual `app/`, `components/`,
+  `lib/`, `config/`, `scripts/`, and `supabase/` file tree (incl.
+  `lib/intake/system-map/` and `components/intake/scan-results/`).
+- `docs/` inventory (`IMPLEMENTATION_LOG`, `INTAKE-WORKER`, `LOGGING`, `OLLAMA`,
+  `PROJECT-INTAKE`, `VISUAL-ASSETS`, `misc/`) matches the documented set.
+- 8 migrations on disk match the documented schema history.
+
+---
+
+## DOCS MAINTENANCE (AUTOMATED SYNC) — 2026-06-14
+
+### Repo State Observed
+
+- `HEAD` is still `1f94339 docs: sync AGENTS.md migration count, log automated
+  run` — the prior automated-sync commit. No new code or doc commits have
+  landed since the 2026-06-12 post-Phase 5 sync.
+- Working tree on branch `codex/phase-5-deterministic-system-map-seed`. The
+  large "modified" set reported by `git status` is CRLF/line-ending noise from
+  the Windows checkout (`git diff --ignore-all-space` is empty); no substantive
+  content changed.
+- Root .md files unchanged: `AGENTS.md`, `README.md`, `CLAUDE.md` (one-line
+  `@AGENTS.md` pointer). `IMPLEMENTATION_LOG.md` remains in `docs/`. No root
+  .md files required migration or moving this run.
+
+### Changed
+
+- `AGENTS.md`: bumped footer to `Last auto-updated: 2026-06-14` (review date).
+  The `Current State (as of 2026-06-12)` header is intentionally retained — it
+  marks the last actual code change (Phase 5), which has not advanced.
+- `README.md`: bumped footer to `Last auto-updated: 2026-06-14`.
+
+### Verified Accurate (no change needed)
+
+- 8 migrations on disk (`...20260612020000_create_phase_5_system_map_seed_read`
+  latest) match the documented schema history and the structure tree count.
+- `lib/intake/system-map/` (build-system-map-seed, classifiers, contracts,
+  formatting + tests) and `components/intake/scan-results/`
+  (scan-results-view, system-map-seed-view + tests) exist as documented.
+- App routes (`api/ai/chat`, `api/ai/health`, `api/log`, `api/projects/import`,
+  `api/scans/[scanId]`, dashboard + scan-results pages, marketing landing)
+  match `AGENTS.md`.
+- `lib/` root clients (`client`, `server`, `middleware`, `utils`),
+  `components/ui/button.tsx`, and `config/{site,navigation}.ts` match.
+- Phase 4/5 read migrations still flagged as not yet applied to the linked
+  Supabase project — no change in that status this run.
+
+### Notes
+
+- No files moved; nothing deleted. README remains setup-only; the `CLAUDE.md`
+  `@AGENTS.md` pointer is intact and is agent config, not status narration.
