@@ -14,7 +14,7 @@ This is a **codebase intelligence studio** — not a generic SaaS app. The produ
 
 Latest phase: **Phase 7 — deterministic reusable asset candidates**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The Phase 4–7 read migrations are **not yet applied to the linked Supabase project**.
 
-> Git note: at this sync the local git repository was in a broken/uninitialized state (no commits, corrupted index, unremovable `index.lock`), so branch/commit context could not be read. Current state below is derived from the working-tree file structure, the dated Supabase migrations, and `docs/IMPLEMENTATION_LOG.md` (authoritative through Phase 7).
+> Git note: the repository is healthy with intact history on `main` (HEAD `e69d4f8`). During the 2026-06-15 automated sync, a stale `.git/index.lock` temporarily blocked git reads from the sandbox, so that run's codebase state was derived from the working-tree file structure and the dated Supabase migrations rather than commit history. The lock was removed and normal git operation restored.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -164,11 +164,10 @@ The studio is a tool developers use when inheriting, recovering, or deeply under
 
 ## Next Steps (in order)
 
-1. Repair the local git repository (no commits / corrupted index / stale `index.lock`) so branch and commit history are trackable again.
-2. Apply the Phase 4–7 read/storage migrations to the linked Supabase project and run security/performance advisors.
-3. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
-4. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
-5. With deterministic symbol and reusable-asset metadata now persisted, design the next layer (relationships / system-map graph or work-session memory) before introducing AI summaries, embeddings, or semantic search.
+1. Apply the Phase 4–7 read/storage migrations to the linked Supabase project and run security/performance advisors.
+2. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
+3. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
+4. With deterministic symbol and reusable-asset metadata now persisted, design the next layer (relationships / system-map graph or work-session memory) before introducing AI summaries, embeddings, or semantic search.
 
 ## Environment Variables
 

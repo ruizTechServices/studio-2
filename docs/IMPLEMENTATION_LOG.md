@@ -871,3 +871,31 @@ automatic modification, or graph-canvas work.
 - Broken local git repo (see Repo State Observed) — flagged as the top Next Step
   in `AGENTS.md`. Until repaired, automated syncs cannot use commit history and
   must rely on file structure + migrations.
+
+---
+
+## DOCS MAINTENANCE FOLLOW-UP (CORRECTION) — 2026-06-15
+
+### Correction to the entry above
+
+The git repository was **not** broken or corrupted. The single cause was a
+stale `.git/index.lock` left behind by an interrupted operation, which blocked
+git index reads — including from the automated sandbox, where the lock could
+not be deleted ("Operation not permitted"). The earlier "no commits / corrupted
+index" reading was a misdiagnosis of that symptom.
+
+### Resolution
+
+- Removed the stale lock (`rm -f .git/index.lock`); `git status` and `git log`
+  then confirmed full, intact history on `main`.
+- Committed the 2026-06-15 docs sync (`e69d4f8 docs: sync canonical docs to
+  Phase 7 (symbol scan + reusable assets)`) and pushed to `origin/main`
+  (`54c6bff..e69d4f8`).
+- `AGENTS.md`: corrected the git note to reflect a healthy repo + stale-lock
+  cause, and removed the now-moot "repair the local git repository" Next Step.
+
+### Lesson for future automated runs
+
+A failed `git log`/`status` from the sandbox does not imply a damaged repo.
+Check for `.git/index.lock` first; treat sandbox permission errors on `.git/`
+as environment limits, not repository corruption.
