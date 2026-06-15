@@ -824,3 +824,50 @@ automatic refactoring, reusable asset extraction, or graph-canvas work.
 Candidates require review and are not guaranteed reusable assets. Phase 7 does
 not add AI summaries, embeddings, semantic search, source-code persistence,
 automatic modification, or graph-canvas work.
+
+---
+
+## DOCS MAINTENANCE (AUTOMATED SYNC) — 2026-06-15
+
+### Repo State Observed
+
+- The local git repository was in a **broken/uninitialized state**: `git log`,
+  `git diff HEAD~1`, and `git branch` all failed ("No commits yet", "Failed to
+  resolve HEAD", "cache entry has null sha1"), and the `index.lock` could not be
+  removed. Git-based history was therefore unavailable this run; codebase state
+  was derived from the working-tree file structure, the dated Supabase
+  migrations, and this log.
+- Root .md files unchanged in role: `AGENTS.md`, `README.md`, `CLAUDE.md`
+  (one-line `@AGENTS.md` pointer). `IMPLEMENTATION_LOG.md` remains in `docs/`.
+  No root .md files required migration or moving this run.
+- On-disk reality detected: 10 Supabase migrations (through
+  `20260615000000_create_phase_7_reusable_asset_candidates`), new
+  `lib/intake/symbols/` (P6) and `lib/intake/reusable-assets/` (P7) modules,
+  and new `symbol-summary-view` + `reusable-asset-candidates-view` scan-results
+  components. 41 co-located test files.
+
+### Changed
+
+- `AGENTS.md`: brought the canonical status forward from its stale Phase 5
+  (2026-06-12) snapshot to **Phase 7 (2026-06-15)**. Updated the Current State
+  header and git note; added Phase 6 (symbol scanning) and Phase 7 (reusable
+  asset candidates) to the Completed list with their modules, views, and
+  migrations; expanded the `lib/intake/` and `components/intake/scan-results/`
+  structure tree (added `system-map/`, `symbols/`, `reusable-assets/`); bumped
+  the migration count 8 → 10; broadened the scan-results architecture rule to
+  cover symbols and reusable-asset candidates; refreshed Next Steps (added git
+  repair + Phase 4–7 migration application); bumped footer to 2026-06-15.
+- `README.md`: removed the Phase 7 status-narration paragraph (migrated into
+  `AGENTS.md`, the single source of truth for status); README stays setup-only.
+  Bumped footer to 2026-06-15.
+
+### Migrated
+
+- Phase 7 status narration: `README.md` → `AGENTS.md` (Current State + Completed
+  list). No content dropped.
+
+### Anomalies
+
+- Broken local git repo (see Repo State Observed) — flagged as the top Next Step
+  in `AGENTS.md`. Until repaired, automated syncs cannot use commit history and
+  must rely on file structure + migrations.

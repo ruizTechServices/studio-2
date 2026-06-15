@@ -4,10 +4,6 @@ A codebase intelligence studio — built for project recovery, system visualizat
 
 > Current project status: see [AGENTS.md](./AGENTS.md)
 
-Phase 7 adds deterministic reusable asset candidate detection from file and
-symbol metadata. Source is parsed only in bounded worker memory; source code,
-AI summaries, and embeddings remain outside the persistence boundary.
-
 ## Prerequisites
 
 - Node.js 20+
@@ -75,4 +71,4 @@ Standard Next.js deployment (`npm run build` + `npm run start`, or a platform li
 
 Usage guides live in `docs/`: `LOGGING.md` (centralized logging), `OLLAMA.md` (stateless local AI endpoints), `PROJECT-INTAKE.md` (intake contract), `INTAKE-WORKER.md` (worker operations), and `VISUAL-ASSETS.md` (brand and animation system).
 
-> Last auto-updated: 2026-06-14
+> Last auto-updated: 2026-06-15

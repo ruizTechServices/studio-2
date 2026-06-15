@@ -10,9 +10,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This is a **codebase intelligence studio** — not a generic SaaS app. The product goal is project recovery, system visualization, reusable asset extraction, and work-session continuity. It is a clean Next.js rebuild of `ruizTechStudio` with intentional architecture.
 
-## Current State (as of 2026-06-12)
+## Current State (as of 2026-06-15)
 
-Branch: `codex/phase-5-deterministic-system-map-seed` (on top of merged Phase 4). Phase 5 adds the first MVP-aligned deterministic system-map seed from metadata-only scan inventory. Source parsing, AI summaries, embeddings, graph visualization, and reusable asset extraction have not started. Phase 4 and Phase 5 read migrations are **not yet applied to the linked Supabase project**.
+Latest phase: **Phase 7 — deterministic reusable asset candidates**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The Phase 4–7 read migrations are **not yet applied to the linked Supabase project**.
+
+> Git note: at this sync the local git repository was in a broken/uninitialized state (no commits, corrupted index, unremovable `index.lock`), so branch/commit context could not be read. Current state below is derived from the working-tree file structure, the dated Supabase migrations, and `docs/IMPLEMENTATION_LOG.md` (authoritative through Phase 7).
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -51,6 +53,10 @@ Completed since initial scaffold:
 - `supabase/migrations/20260612010000_create_phase_4_scan_results_read.sql` — bounded service-role-only results read RPC
 - `lib/intake/system-map/` + `components/intake/scan-results/system-map-seed-view.tsx` — deterministic metadata-only structure seed and compact overview (Phase 5)
 - `supabase/migrations/20260612020000_create_phase_5_system_map_seed_read.sql` — service-role-only metadata read for system-map seed generation
+- `lib/intake/symbols/` + `components/intake/scan-results/symbol-summary-view.tsx` — TypeScript-compiler-API extraction (imports, exports, functions, components, hooks, API handlers, types, constants) persisted as metadata-only symbol rows, plus a bounded symbol summary view (Phase 6)
+- `supabase/migrations/20260614000000_create_phase_6_symbol_scanning.sql` — private metadata-only symbol storage, lease-checked batches, atomic count verification, and a service-role-only symbol-summary read RPC
+- `lib/intake/reusable-assets/` + `components/intake/scan-results/reusable-asset-candidates-view.tsx` — pure deterministic classifier scoring reusable asset candidates from existing file/symbol metadata, plus a compact candidates view (Phase 7)
+- `supabase/migrations/20260615000000_create_phase_7_reusable_asset_candidates.sql` — private metadata-only candidate persistence, atomic finalization verification, and a bounded service-role candidate-summary RPC
 
 ## Tech Stack
 
@@ -94,7 +100,8 @@ studio-2/
 │   ├── brand/                      # brand-logo.tsx
 │   ├── intake/
 │   │   ├── project-intake-form.tsx # Phase 1 GitHub intake form
-│   │   └── scan-results/           # Phase 4 scan results presentation
+│   │   └── scan-results/           # scan-results-view, system-map-seed-view (P5),
+│   │                               # symbol-summary-view (P6), reusable-asset-candidates-view (P7)
 │   ├── marketing/                  # marketing-navbar.tsx, marketing-footer.tsx
 │   └── ui/                         # shadcn/ui components (button.tsx)
 ├── config/                         # navigation.ts (dashboard nav), site.ts (siteConfig)
@@ -106,6 +113,9 @@ studio-2/
 │   │   ├── contracts.ts / github-url.ts / http.ts / policy.ts / repository.ts / validation.ts
 │   │   ├── archive/                # Phase 3: github, download, inventory, classification, policy
 │   │   ├── results/                # Phase 4: contracts, formatting, repository (read model)
+│   │   ├── system-map/             # Phase 5: build-system-map-seed, classifiers, contracts, formatting
+│   │   ├── symbols/                # Phase 6: contracts, extract (TS-compiler-API symbol extraction)
+│   │   ├── reusable-assets/        # Phase 7: contracts, classify (candidate scoring)
 │   │   └── worker/                 # Phase 2: config, contracts, failures, processor, repository, runner
 │   ├── client.ts                   # Supabase browser client
 │   ├── server.ts                   # Supabase server client (RSC / Server Actions)
@@ -113,9 +123,10 @@ studio-2/
 │   └── utils.ts                    # cn() utility
 ├── scripts/intake-worker.ts        # CLI entry — worker:intake / worker:intake:once
 ├── supabase/
-│   ├── migrations/                 # 8 migrations: logs, intake foundation, grants,
+│   ├── migrations/                 # 10 migrations: logs, intake foundation, grants,
 │   │                               # worker foundation, claim fix, phase 3 archive,
-│   │                               # phase 4 read, phase 5 system-map seed read
+│   │                               # phase 4 read, phase 5 system-map seed read,
+│   │                               # phase 6 symbol scanning, phase 7 reusable asset candidates
 │   └── sql/enable_logs_retention.sql # pg_cron daily purge (logs > 30d) — opt-in
 ├── docs/                           # IMPLEMENTATION_LOG, INTAKE-WORKER, LOGGING, OLLAMA,
 │                                   # PROJECT-INTAKE, VISUAL-ASSETS, misc/
@@ -132,7 +143,7 @@ studio-2/
 - **Logging**: always use `lib/logger/server.ts` on the server, `lib/logger/client.ts` on the client. Never import server logger into Client Components. See `docs/LOGGING.md`.
 - **AI**: never call Ollama directly from route handlers. Use `lib/ai/ollama-client.ts` (`chatWithOllama`, `getOllamaModels`). Validate requests with `lib/ai/model-policy.ts` first. Build the message array with `lib/ai/context-builder.ts`. See `docs/OLLAMA.md`.
 - **Project intake**: intake is local-only and production-hidden. Validate through `lib/intake/`, never fetch submitted URLs directly, never expose service-role access to clients, and never persist or log source contents. See `docs/PROJECT-INTAKE.md`.
-- **Scan results and system-map seed**: Phase 5 derives a compact deterministic structure model from private `scan_files` metadata only. No source contents, parsing, graph canvas, AI, embeddings, or asset extraction. Read through `lib/intake/results/` and build through `lib/intake/system-map/`.
+- **Scan results, system-map seed, symbols, and reusable-asset candidates**: derive compact deterministic models from private `scan_files`/symbol metadata only. Source is parsed only in bounded worker memory and is never persisted, logged, returned, or written to disk. No graph canvas, AI, embeddings, or semantic search. Read through `lib/intake/results/`; build through `lib/intake/system-map/` (P5), `lib/intake/symbols/` (P6 TS-compiler-API extraction), and `lib/intake/reusable-assets/` (P7 candidate scoring). Candidates require review and are not guaranteed reusable.
 - **Config**: site metadata → `config/site.ts` (`siteConfig`). Dashboard nav items → `config/navigation.ts` (`dashboardNavigation`).
 - **Visual assets**: use `BrandLogo` for in-product branding (static light/dark variants only when assets leave the application), static assets from `public/brand/` and `public/illustrations/`, and reusable motion from `components/animations/` — no one-off motion for feature pages. All motion must respect `prefers-reduced-motion`. Meaningful images require useful alt text; decorative animations must be hidden from assistive technology. See `docs/VISUAL-ASSETS.md`.
 - **Testing**: Vitest (`npm run test`). Test files co-located with source (`.test.ts`). Coverage via `npm run test:coverage`.
@@ -153,10 +164,11 @@ The studio is a tool developers use when inheriting, recovering, or deeply under
 
 ## Next Steps (in order)
 
-1. Apply the Phase 4 and Phase 5 read migrations to the linked Supabase project and run advisors.
-2. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
-3. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
-4. Add deterministic JS/TS scanning before deeper system-map relationships, reusable-asset, status-summary, or AI-summary work.
+1. Repair the local git repository (no commits / corrupted index / stale `index.lock`) so branch and commit history are trackable again.
+2. Apply the Phase 4–7 read/storage migrations to the linked Supabase project and run security/performance advisors.
+3. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
+4. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
+5. With deterministic symbol and reusable-asset metadata now persisted, design the next layer (relationships / system-map graph or work-session memory) before introducing AI summaries, embeddings, or semantic search.
 
 ## Environment Variables
 
@@ -181,4 +193,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-14
+> Last auto-updated: 2026-06-15
