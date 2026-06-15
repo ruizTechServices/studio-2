@@ -4,9 +4,9 @@ A codebase intelligence studio — built for project recovery, system visualizat
 
 > Current project status: see [AGENTS.md](./AGENTS.md)
 
-Phase 6 adds deterministic JS/TS/JSX/TSX symbol scanning. Source is parsed only
-in bounded worker memory; the database and results UI receive metadata-only
-symbol summaries. AI, embeddings, and reusable asset extraction remain deferred.
+Phase 7 adds deterministic reusable asset candidate detection from file and
+symbol metadata. Source is parsed only in bounded worker memory; source code,
+AI summaries, and embeddings remain outside the persistence boundary.
 
 ## Prerequisites
 

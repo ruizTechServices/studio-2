@@ -35,6 +35,7 @@ function repository(): ScanWorkerRepository {
     beginScanInventory: vi.fn().mockResolvedValue(true),
     persistScanFilesBatch: vi.fn().mockResolvedValue(true),
     persistScanSymbolsBatch: vi.fn().mockResolvedValue(true),
+    persistReusableAssetCandidatesBatch: vi.fn().mockResolvedValue(true),
     releaseScanForRetry: vi.fn(),
     failScan: vi.fn(),
     completeScan: vi.fn(),
@@ -91,6 +92,7 @@ describe('processPhase3Archive', () => {
       status: 'completed',
       expectedFileCount: 1,
       expectedSymbolCount: 2,
+      expectedReusableAssetCandidateCount: 1,
       sourceCommitSha: sha,
     })
     expect(persistence.persistScanFilesBatch).toHaveBeenCalledWith(
@@ -107,6 +109,16 @@ describe('processPhase3Archive', () => {
     )
     expect(JSON.stringify(vi.mocked(persistence.persistScanSymbolsBatch).mock.calls)).not.toContain(
       'export const value = 1'
+    )
+    expect(persistence.persistReusableAssetCandidatesBatch).toHaveBeenCalledWith(
+      scanId,
+      'worker-1',
+      [expect.objectContaining({ symbolName: 'value', assetKind: 'constant' })]
+    )
+    expect(
+      vi.mocked(persistence.persistScanSymbolsBatch).mock.invocationCallOrder[0]
+    ).toBeLessThan(
+      vi.mocked(persistence.persistReusableAssetCandidatesBatch).mock.invocationCallOrder[0]
     )
     expect(await leftovers()).toEqual([])
   })

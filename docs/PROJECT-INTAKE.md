@@ -8,7 +8,8 @@ are introduced.
 
 Phase 1 intake, Phase 2 queue mechanics, Phase 3 safe archive intake, Phase 4
 deterministic results view, the Phase 5 metadata-only system-map seed, and
-Phase 6 deterministic JS/TS symbol scanning are implemented:
+Phase 6 deterministic JS/TS symbol scanning, and Phase 7 deterministic reusable
+asset candidate detection are implemented:
 
 - `/dashboard/import` validates an exact public GitHub repository URL and an
   optional explicit ref.
@@ -32,6 +33,9 @@ Phase 6 deterministic JS/TS symbol scanning are implemented:
 - Bounded JS/TS/JSX/TSX files are parsed during worker processing and only
   deterministic import, export, declaration, component, hook, and API-handler
   metadata is persisted.
+- Exported components, hooks, utilities, API handlers, types, constants, and
+  repository-intelligence logic are scored into bounded metadata-only reusable
+  asset candidate records. Tests, imports, and generated outputs are excluded.
 
 ## Safety Boundary
 
@@ -102,6 +106,8 @@ language/category counts, and at most 50 metadata-only inventory rows. It never
 returns or displays source contents or content hashes. It also renders the
 first compact MVP system overview from deterministic metadata-only groups.
 It also renders bounded symbol counts and a compact metadata-only preview.
+Reusable asset candidates are shown as deterministic suggestions that require
+review before reuse.
 
 ## Database Model
 
@@ -114,6 +120,7 @@ Migrations:
 - `supabase/migrations/20260612010000_create_phase_4_scan_results_read.sql`
 - `supabase/migrations/20260612020000_create_phase_5_system_map_seed_read.sql`
 - `supabase/migrations/20260614000000_create_phase_6_symbol_scanning.sql`
+- `supabase/migrations/20260615000000_create_phase_7_reusable_asset_candidates.sql`
 
 `public.projects` stores normalized public GitHub repository identity.
 `public.scans` stores immutable scan identity, queue status, attempts, retry
@@ -127,6 +134,8 @@ project/scan pair and returns a bounded metadata-only preview.
 private inventory metadata required to derive the bounded system-map seed.
 `public.scan_symbols` stores private metadata-only deterministic findings.
 `get_scan_symbol_summary` returns service-role-only bounded counts and preview.
+`public.scan_reusable_asset_candidates` stores bounded deterministic candidate
+metadata. `get_scan_reusable_asset_summary` returns a service-role-only preview.
 
 RLS is enabled on all intake tables. Public, anon, and authenticated access is
 revoked. Worker RPCs use row ownership checks and are executable only by
@@ -160,6 +169,7 @@ and unsupported refs fail with safe path-free errors.
 | Directory depth | 35 |
 | Scan duration | 10 minutes |
 | Symbols | 100,000 |
+| Reusable asset candidates | 5,000 |
 | Relationships | 200,000 |
 | Concurrent scans per worker | 1 |
 

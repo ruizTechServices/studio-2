@@ -14,6 +14,7 @@ import type {
   ScanProcessorContext,
 } from '@/lib/intake/worker/contracts'
 import { WorkerFailure } from '@/lib/intake/worker/failures'
+import { buildReusableAssetCandidates } from '@/lib/intake/reusable-assets/classify'
 
 async function requireLease(value: Promise<boolean>): Promise<void> {
   if (!(await value)) {
@@ -102,6 +103,21 @@ export async function processPhase3Archive(
         )
       )
     }
+    const candidates = buildReusableAssetCandidates(
+      claim.scanId,
+      claim.projectId,
+      inventory.files,
+      inventory.symbols
+    )
+    for (let index = 0; index < candidates.length; index += 500) {
+      await requireLease(
+        context.repository.persistReusableAssetCandidatesBatch(
+          claim.scanId,
+          context.workerId,
+          candidates.slice(index, index + 500)
+        )
+      )
+    }
 
     return {
       status:
@@ -114,6 +130,7 @@ export async function processPhase3Archive(
       sourceCommitSha: source.commitSha,
       expectedFileCount: inventory.files.length,
       expectedSymbolCount: inventory.symbols.length,
+      expectedReusableAssetCandidateCount: candidates.length,
     }
   } finally {
     if (temporaryDirectory) {

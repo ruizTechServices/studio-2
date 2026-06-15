@@ -155,4 +155,47 @@ describe('scanWorkerRepository', () => {
       p_symbols: symbols,
     })
   })
+
+  it('persists reusable candidate metadata through the service-role RPC', async () => {
+    mocks.rpc.mockResolvedValue({ data: true, error: null })
+    const candidates = [{
+      scanId: SCAN_ID,
+      projectId: PROJECT_ID,
+      relativePath: 'lib/tool.ts',
+      symbolName: 'tool',
+      symbolKind: 'function' as const,
+      assetKind: 'utility' as const,
+      exported: true,
+      confidence: 'high' as const,
+      reuseScore: 80,
+      reasons: ['Exported declaration'],
+    }]
+    await scanWorkerRepository.persistReusableAssetCandidatesBatch(SCAN_ID, 'worker-1', candidates)
+    expect(mocks.rpc).toHaveBeenCalledWith('persist_scan_reusable_asset_candidates_batch', {
+      p_scan_id: SCAN_ID,
+      p_worker_id: 'worker-1',
+      p_candidates: candidates,
+    })
+  })
+
+  it('finalizes Phase 7 with verified candidate metadata count', async () => {
+    mocks.rpc.mockResolvedValue({ data: true, error: null })
+    await scanWorkerRepository.completeScan(SCAN_ID, 'worker-1', {
+      status: 'completed',
+      statistics: { filesDiscovered: 1 },
+      warnings: [],
+      projectId: PROJECT_ID,
+      defaultBranch: 'main',
+      resolvedRef: 'main',
+      sourceCommitSha: 'a'.repeat(40),
+      expectedFileCount: 1,
+      expectedSymbolCount: 2,
+      expectedReusableAssetCandidateCount: 1,
+    })
+    expect(mocks.rpc).toHaveBeenCalledWith('finalize_phase_7_scan', expect.objectContaining({
+      p_expected_file_count: 1,
+      p_expected_symbol_count: 2,
+      p_expected_candidate_count: 1,
+    }))
+  })
 })

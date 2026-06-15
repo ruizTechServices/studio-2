@@ -260,8 +260,8 @@ export function ProjectIntakeForm() {
             <div>
               <h2 className="text-sm font-semibold">Public GitHub repository</h2>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Phase 1 creates a durable queued scan. It does not fetch or inspect
-                source code yet.
+                  Creates a durable queued scan for bounded deterministic repository
+                  inspection. Source contents are never persisted.
               </p>
             </div>
           </div>

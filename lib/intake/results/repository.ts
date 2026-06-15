@@ -11,12 +11,20 @@ import {
   type ScanSymbol,
   type SymbolSummary,
 } from '@/lib/intake/symbols/contracts'
+import {
+  REUSABLE_ASSET_KINDS,
+  type ReusableAssetCandidate,
+  type ReusableAssetSummary,
+} from '@/lib/intake/reusable-assets/contracts'
 
 const CATEGORIES = new Set(['test', 'docs', 'config', 'asset', 'source', 'other'])
 const SYSTEM_MAP_FILE_LIMIT = 20_000
 const SYMBOL_PREVIEW_LIMIT = 25
 const SYMBOL_CONFIDENCES = new Set(['high', 'medium', 'low'])
 const SYMBOL_CATEGORIES = new Set(['dependency', 'declaration', 'routing', 'unknown'])
+const REUSABLE_ASSET_PREVIEW_LIMIT = 12
+const REUSABLE_SYMBOL_KINDS = new Set(['function', 'component', 'hook', 'api_handler', 'type', 'constant', 'unknown'])
+const EMPTY_REUSABLE_ASSET_SUMMARY: ReusableAssetSummary = { total: 0, preview: [] }
 
 export class ScanResultsPersistenceError extends Error {
   constructor(
@@ -137,10 +145,42 @@ function parseSymbolSummary(value: unknown): SymbolSummary | null {
   return { total: value.total as number, counts, preview }
 }
 
+function parseReusableAssetSummary(value: unknown): ReusableAssetSummary | null {
+  if (!isRecord(value) || !Number.isSafeInteger(value.total) || (value.total as number) < 0) return null
+  if (!Array.isArray(value.preview) || value.preview.length > REUSABLE_ASSET_PREVIEW_LIMIT) return null
+  const preview: ReusableAssetCandidate[] = []
+  for (const candidate of value.preview) {
+    if (
+      !isRecord(candidate) ||
+      typeof candidate.scanId !== 'string' ||
+      typeof candidate.projectId !== 'string' ||
+      typeof candidate.relativePath !== 'string' ||
+      typeof candidate.symbolName !== 'string' ||
+      typeof candidate.symbolKind !== 'string' ||
+      !REUSABLE_SYMBOL_KINDS.has(candidate.symbolKind) ||
+      typeof candidate.assetKind !== 'string' ||
+      !REUSABLE_ASSET_KINDS.includes(candidate.assetKind as (typeof REUSABLE_ASSET_KINDS)[number]) ||
+      typeof candidate.exported !== 'boolean' ||
+      typeof candidate.confidence !== 'string' ||
+      !SYMBOL_CONFIDENCES.has(candidate.confidence) ||
+      !Number.isSafeInteger(candidate.reuseScore) ||
+      (candidate.reuseScore as number) < 0 ||
+      (candidate.reuseScore as number) > 100 ||
+      !Array.isArray(candidate.reasons) ||
+      candidate.reasons.length < 1 ||
+      candidate.reasons.length > 3 ||
+      !candidate.reasons.every((reason) => typeof reason === 'string')
+    ) return null
+    preview.push(candidate as unknown as ReusableAssetCandidate)
+  }
+  return { total: value.total as number, preview }
+}
+
 function parseResults(
   value: unknown,
   systemMapFiles: readonly SystemMapFileMetadata[],
-  symbolSummary: SymbolSummary
+  symbolSummary: SymbolSummary,
+  reusableAssetSummary: ReusableAssetSummary
 ): ScanResults | null {
   if (!isRecord(value) || !isRecord(value.project) || !isRecord(value.scan)) return null
   const { project, scan } = value
@@ -195,6 +235,7 @@ function parseResults(
     inventoryPreview: preview,
     systemMapSeed: buildSystemMapSeed(scan.id, scan.projectId, systemMapFiles),
     symbolSummary,
+    reusableAssetSummary,
   }
 }
 
@@ -250,7 +291,22 @@ export async function getScanResults(
     )
   }
 
-  const parsed = parseResults(data, systemMapFiles, symbolSummary)
+  const reusableAssetResponse = await client.rpc('get_scan_reusable_asset_summary', {
+    p_project_id: projectId,
+    p_scan_id: scanId,
+    p_preview_limit: REUSABLE_ASSET_PREVIEW_LIMIT,
+  })
+  const reusableAssetSummary = reusableAssetResponse.error
+    ? EMPTY_REUSABLE_ASSET_SUMMARY
+    : parseReusableAssetSummary(reusableAssetResponse.data)
+  if (reusableAssetSummary === null) {
+    throw new ScanResultsPersistenceError(
+      'invalid_response',
+      'Scan results returned an invalid response.'
+    )
+  }
+
+  const parsed = parseResults(data, systemMapFiles, symbolSummary, reusableAssetSummary)
   if (!parsed || parsed.project.id !== projectId || parsed.scan.id !== scanId) {
     throw new ScanResultsPersistenceError(
       'invalid_response',
