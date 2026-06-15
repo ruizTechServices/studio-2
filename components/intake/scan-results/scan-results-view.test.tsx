@@ -77,6 +77,21 @@ function results(overrides: Partial<ScanResults['scan']> = {}): ScanResults {
         category: 'declaration',
       }],
     },
+    reusableAssetSummary: {
+      total: 1,
+      preview: [{
+        scanId: 'scan-id',
+        projectId: 'project-id',
+        relativePath: 'src/index.ts',
+        symbolName: 'value',
+        symbolKind: 'constant',
+        assetKind: 'constant',
+        exported: true,
+        confidence: 'medium',
+        reuseScore: 53,
+        reasons: ['Exported declaration'],
+      }],
+    },
   }
 }
 
@@ -88,6 +103,7 @@ describe('ScanResultsView', () => {
     expect(html).toContain('src/index.ts')
     expect(html).toContain('TypeScript')
     expect(html).toContain('Symbol Summary')
+    expect(html).toContain('Reusable Asset Candidates')
     expect(html).not.toContain('contentHash')
     expect(html).not.toContain('console.log("secret source")')
   })

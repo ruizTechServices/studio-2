@@ -86,6 +86,22 @@ const validSymbolSummary = {
   }],
 }
 
+const validReusableAssetSummary = {
+  total: 1,
+  preview: [{
+    scanId: SCAN_ID,
+    projectId: PROJECT_ID,
+    relativePath: 'src/index.ts',
+    symbolName: 'value',
+    symbolKind: 'constant',
+    assetKind: 'constant',
+    exported: true,
+    confidence: 'medium',
+    reuseScore: 53,
+    reasons: ['Exported declaration'],
+  }],
+}
+
 beforeEach(() => {
   mocks.createServiceRoleClient.mockReturnValue({ rpc: mocks.rpc })
   mocks.rpc.mockImplementation((name: string) => Promise.resolve({
@@ -93,7 +109,9 @@ beforeEach(() => {
       ? validResult
       : name === 'get_scan_system_map_files'
         ? validSystemMapFiles
-        : validSymbolSummary,
+        : name === 'get_scan_symbol_summary'
+          ? validSymbolSummary
+          : validReusableAssetSummary,
     error: null,
   }))
 })
@@ -109,6 +127,7 @@ describe('getScanResults', () => {
       counts: { sourceModules: 1 },
     })
     expect(results?.symbolSummary).toEqual(validSymbolSummary)
+    expect(results?.reusableAssetSummary).toEqual(validReusableAssetSummary)
     expect(mocks.rpc).toHaveBeenCalledWith('get_scan_results', {
       p_project_id: PROJECT_ID,
       p_scan_id: SCAN_ID,
@@ -122,6 +141,11 @@ describe('getScanResults', () => {
       p_project_id: PROJECT_ID,
       p_scan_id: SCAN_ID,
       p_preview_limit: 25,
+    })
+    expect(mocks.rpc).toHaveBeenCalledWith('get_scan_reusable_asset_summary', {
+      p_project_id: PROJECT_ID,
+      p_scan_id: SCAN_ID,
+      p_preview_limit: 12,
     })
     expect(JSON.stringify(results)).not.toContain('contentHash')
   })
@@ -163,6 +187,28 @@ describe('getScanResults', () => {
       .mockResolvedValueOnce({ data: validResult, error: null })
       .mockResolvedValueOnce({ data: validSystemMapFiles, error: null })
       .mockResolvedValueOnce({ data: { ...validSymbolSummary, preview: Array(26).fill(validSymbolSummary.preview[0]) }, error: null })
+    await expect(getScanResults(PROJECT_ID, SCAN_ID)).rejects.toMatchObject({
+      code: 'invalid_response',
+    })
+  })
+
+  it('uses an empty candidate summary when the optional candidate read fails', async () => {
+    mocks.rpc
+      .mockResolvedValueOnce({ data: validResult, error: null })
+      .mockResolvedValueOnce({ data: validSystemMapFiles, error: null })
+      .mockResolvedValueOnce({ data: validSymbolSummary, error: null })
+      .mockResolvedValueOnce({ data: null, error: { message: 'missing migration' } })
+    await expect(getScanResults(PROJECT_ID, SCAN_ID)).resolves.toMatchObject({
+      reusableAssetSummary: { total: 0, preview: [] },
+    })
+  })
+
+  it('rejects malformed candidate metadata safely', async () => {
+    mocks.rpc
+      .mockResolvedValueOnce({ data: validResult, error: null })
+      .mockResolvedValueOnce({ data: validSystemMapFiles, error: null })
+      .mockResolvedValueOnce({ data: validSymbolSummary, error: null })
+      .mockResolvedValueOnce({ data: { total: 1, preview: [{ symbolName: 'invalid' }] }, error: null })
     await expect(getScanResults(PROJECT_ID, SCAN_ID)).rejects.toMatchObject({
       code: 'invalid_response',
     })

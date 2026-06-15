@@ -804,3 +804,23 @@ migration has not been applied or verified against the linked project.
 
 Phase 6 does not persist source code or add AI, embeddings, relationships,
 automatic refactoring, reusable asset extraction, or graph-canvas work.
+
+---
+
+## REUSABLE ASSET CANDIDATES PHASE 7 — 2026-06-15
+
+### Implemented
+
+- Added a pure deterministic classifier that scores bounded reusable asset
+  candidates from existing file and symbol metadata.
+- Prioritized exported components, hooks, utilities, API handlers, shared
+  types, constants, and repository-intelligence logic while excluding imports,
+  tests, test globals, and generated outputs.
+- Added private metadata-only persistence, atomic finalization verification, a
+  bounded service-role summary RPC, and compact results UI.
+
+### Intentional Boundary
+
+Candidates require review and are not guaranteed reusable assets. Phase 7 does
+not add AI summaries, embeddings, semantic search, source-code persistence,
+automatic modification, or graph-canvas work.

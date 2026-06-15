@@ -2,7 +2,8 @@
 
 The private, manually-run, single-concurrency Node worker combines durable
 queue mechanics with safe public GitHub archive intake and deterministic
-JS/TS symbol scanning. It never persists or extracts source files.
+JS/TS symbol scanning and reusable candidate detection. It never persists or
+extracts source files.
 
 ## Run Commands
 
@@ -58,6 +59,8 @@ concurrency is fixed at one.
    `completed` or `completed_with_warnings`.
 10. Bounded JS/TS/JSX/TSX source is parsed in memory, metadata-only symbols are
     persisted in lease-checked batches, and finalization verifies symbol count.
+11. Reusable asset candidates are deterministically scored from file and symbol
+    metadata, persisted in lease-checked batches, and count-verified.
 
 ## Security
 
@@ -80,7 +83,7 @@ rejected without calling GitHub tag endpoints.
 
 ## Next Milestone
 
-Keep deeper relationships, graph visualization, AI, and reusable asset
-extraction deferred until deterministic JS/TS symbol evidence is stable.
+Keep deeper relationships, graph visualization, AI interpretation, embeddings,
+and source-code persistence outside the deterministic intake boundary.
 
 > Last auto-updated: 2026-06-12
