@@ -899,3 +899,46 @@ index" reading was a misdiagnosis of that symptom.
 A failed `git log`/`status` from the sandbox does not imply a damaged repo.
 Check for `.git/index.lock` first; treat sandbox permission errors on `.git/`
 as environment limits, not repository corruption.
+
+
+---
+
+## DOCS MAINTENANCE SYNC — 2026-06-16
+
+### Repo State Observed
+
+- Branch `main`, up to date with `origin/main`. HEAD `098e65c` ("docs: correct
+  git note — stale index.lock, not a broken repo").
+- Git history fully readable from the sandbox this run — no `.git/index.lock`,
+  no permission errors. The prior stale-lock issue is resolved.
+- `git status` reports every tracked root/app/lib/component/supabase file as
+  "modified", but `git diff --ignore-cr-at-eol --numstat` returns **zero** real
+  content changes: the diff is entirely CRLF (working tree) vs LF (committed)
+  line-ending noise from the Windows checkout mounted into Linux. No source code
+  changed since the last sync.
+- One genuinely new untracked artifact: `public/images/sdlc_software_development_lifecycle.jpg`.
+
+### Updated
+
+- `AGENTS.md`: bumped Current State date to 2026-06-16; refreshed the git note
+  (HEAD `e69d4f8` → `098e65c`, marked the stale-lock incident resolved, recorded
+  the CRLF-only diff observation); added `SDLC` to the docs/ tree and `images/`
+  to the public/ tree; footer → 2026-06-16.
+- `README.md`: footer → 2026-06-16 (setup content already accurate, no changes).
+
+### Moved
+
+- None. Root contains only the three canonical/config docs (`AGENTS.md`,
+  `README.md`, `CLAUDE.md`). `IMPLEMENTATION_LOG.md`, `SDLC.md`, and all topic
+  guides already live under `docs/` (with `misc/` for `CODE_REVIEW.md` + `page.xml`).
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- Pervasive CRLF/LF diff noise (see Repo State Observed). Consider a
+  `.gitattributes` with `* text=auto eol=lf` to stop the working tree from
+  showing all files as modified on Windows checkouts. Not applied this run
+  (out of scope for a docs-sync task; flagged for the developer).

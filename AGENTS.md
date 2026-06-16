@@ -10,11 +10,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This is a **codebase intelligence studio** — not a generic SaaS app. The product goal is project recovery, system visualization, reusable asset extraction, and work-session continuity. It is a clean Next.js rebuild of `ruizTechStudio` with intentional architecture.
 
-## Current State (as of 2026-06-15)
+## Current State (as of 2026-06-16)
 
 Latest phase: **Phase 7 — deterministic reusable asset candidates**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The Phase 4–7 read migrations are **not yet applied to the linked Supabase project**.
 
-> Git note: the repository is healthy with intact history on `main` (HEAD `e69d4f8`). During the 2026-06-15 automated sync, a stale `.git/index.lock` temporarily blocked git reads from the sandbox, so that run's codebase state was derived from the working-tree file structure and the dated Supabase migrations rather than commit history. The lock was removed and normal git operation restored.
+> Git note: the repository is healthy with intact history on `main` (HEAD `098e65c`). A stale `.git/index.lock` encountered during the 2026-06-15 sync was removed; subsequent runs (including 2026-06-16) confirm normal git reads. The 2026-06-16 working tree shows every tracked file as "modified" purely due to CRLF/LF line-ending differences — `git diff --ignore-cr-at-eol` reports zero real content changes.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -129,8 +129,8 @@ studio-2/
 │   │                               # phase 6 symbol scanning, phase 7 reusable asset candidates
 │   └── sql/enable_logs_retention.sql # pg_cron daily purge (logs > 30d) — opt-in
 ├── docs/                           # IMPLEMENTATION_LOG, INTAKE-WORKER, LOGGING, OLLAMA,
-│                                   # PROJECT-INTAKE, VISUAL-ASSETS, misc/
-└── public/                         # brand/, illustrations/
+│                                   # PROJECT-INTAKE, SDLC, VISUAL-ASSETS, misc/
+└── public/                         # brand/, illustrations/, images/
 ```
 
 ## Architecture Rules
@@ -192,4 +192,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-15
+> Last auto-updated: 2026-06-16
