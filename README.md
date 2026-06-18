@@ -69,6 +69,6 @@ Standard Next.js deployment (`npm run build` + `npm run start`, or a platform li
 
 ## Further Documentation
 
-Usage guides live in `docs/`: `LOGGING.md` (centralized logging), `OLLAMA.md` (stateless local AI endpoints), `PROJECT-INTAKE.md` (intake contract), `INTAKE-WORKER.md` (worker operations), and `VISUAL-ASSETS.md` (brand and animation system).
+Usage guides live in `docs/`: `LOGGING.md` (centralized logging), `OLLAMA.md` (stateless local AI endpoints), `PROJECT-INTAKE.md` (intake contract), `INTAKE-WORKER.md` (worker operations), `VISUAL-ASSETS.md` (brand and animation system), and `SDLC.md` (phased development process).
 
-> Last auto-updated: 2026-06-16
+> Last auto-updated: 2026-06-18

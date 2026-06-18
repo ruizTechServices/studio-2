@@ -942,3 +942,95 @@ as environment limits, not repository corruption.
   `.gitattributes` with `* text=auto eol=lf` to stop the working tree from
   showing all files as modified on Windows checkouts. Not applied this run
   (out of scope for a docs-sync task; flagged for the developer).
+
+
+---
+
+## DOCS MAINTENANCE SYNC — 2026-06-17
+
+### Repo State Observed
+
+- Branch `main`, up to date with `origin/main`. HEAD `0214d9d` ("added an
+  image"). Git history fully readable from the sandbox — no `.git/index.lock`,
+  no permission errors.
+- Since the 2026-06-16 sync, the only new commit is `0214d9d`, which commits
+  the previously-untracked `public/images/sdlc_software_development_lifecycle.jpg`
+  (Bin 0 → 59792 bytes). No source code, dependencies, schema, routes, or
+  module structure changed.
+- `git status` still reports every tracked file as "modified", but
+  `git diff --ignore-all-space --stat` returns **empty** — the diff remains
+  entirely CRLF (working tree) vs LF (committed) line-ending noise from the
+  Windows checkout mounted into Linux.
+
+### Updated
+
+- `AGENTS.md`: bumped Current State date to 2026-06-17; refreshed the git note
+  (HEAD `098e65c` → `0214d9d`, recorded that the SDLC image is now committed
+  rather than untracked); footer → 2026-06-17. Phase content unchanged (still
+  Phase 7; no new features landed).
+- `README.md`: added `SDLC.md` to the docs/ guide list; footer → 2026-06-17.
+  Setup content already accurate, no other changes.
+
+### Moved
+
+- None. Root contains only the three canonical/config docs (`AGENTS.md`,
+  `README.md`, `CLAUDE.md`). `IMPLEMENTATION_LOG.md`, `SDLC.md`, and all topic
+  guides already live under `docs/` (with `misc/` for `CODE_REVIEW.md` +
+  `page.xml`).
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- Pervasive CRLF/LF diff noise persists (144 files, +24604/-24604, net zero).
+  A `.gitattributes` with `* text=auto eol=lf` would stop the working tree from
+  showing all files as modified on Windows checkouts. Not applied this run
+  (out of scope for a docs-sync task; flagged again for the developer).
+
+
+---
+
+## DOCS MAINTENANCE SYNC — 2026-06-18
+
+### Repo State Observed
+
+- Branch `main`, up to date with `origin/main`. HEAD `0214d9d` ("added an
+  image"), unchanged since the 2026-06-17 sync. No new commits — no source,
+  dependency, schema, route, or module changes since the last entry.
+- Codebase remains at **Phase 7** (deterministic reusable asset candidates).
+  `package.json`, `supabase/migrations/` (10 migrations), and the `app/`,
+  `components/`, `lib/` structure all match what `AGENTS.md` already describes.
+- `git status` again reports every tracked file as "modified" while
+  `git diff --ignore-all-space --stat` shows only the doc edits — confirming
+  the working-tree noise is still CRLF (Windows) vs LF (committed) only.
+
+### Updated
+
+- `AGENTS.md`: rolled Current State date and git-note working-tree reference to
+  2026-06-18; footer → 2026-06-18. Phase content unchanged (no new features).
+- `README.md`: footer → 2026-06-18. Setup content already accurate; no other
+  changes.
+
+### Moved
+
+- None. Root holds only the three canonical/config docs (`AGENTS.md`,
+  `README.md`, `CLAUDE.md`). `IMPLEMENTATION_LOG.md`, `SDLC.md`, and all topic
+  guides already live under `docs/` (with `misc/` for `CODE_REVIEW.md` +
+  `page.xml`).
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- The sandbox Linux mount served a stale snapshot of `AGENTS.md` / `README.md`
+  (footers dropped, `README.md` truncated mid-sentence) that did NOT match the
+  user's actual on-disk files, which were intact and current at 2026-06-17.
+  Edits were made through the file tools (the user's real folder), not the
+  stale mount. Flagged for the developer.
+- CRLF/LF diff noise persists. A `.gitattributes` with `* text=auto eol=lf`
+  would stop the working tree from showing all files as modified on Windows
+  checkouts. Not applied (out of scope for docs-sync).
