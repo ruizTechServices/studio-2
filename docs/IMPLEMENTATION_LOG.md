@@ -1034,3 +1034,108 @@ as environment limits, not repository corruption.
 - CRLF/LF diff noise persists. A `.gitattributes` with `* text=auto eol=lf`
   would stop the working tree from showing all files as modified on Windows
   checkouts. Not applied (out of scope for docs-sync).
+
+
+---
+
+## DOCS MAINTENANCE SYNC — 2026-06-19
+
+### Repo State Observed
+
+- Branch `main`, up to date with `origin/main`. HEAD is now `72f3fc9`
+  ("docs: sync canonical docs for 2026-06-18 run") — the only new commit since
+  the 2026-06-18 entry, which simply committed that run's doc edits. No source,
+  dependency, schema, route, or module changes since Phase 7.
+- Codebase remains at **Phase 7** (deterministic reusable asset candidates).
+  `package.json` scripts, `supabase/migrations/` (10 migrations), and the
+  `app/`, `components/`, `lib/` structure all still match what `AGENTS.md`
+  describes.
+- `git status` again reports every tracked file as "modified" while
+  `git diff --ignore-all-space --stat` shows only the doc edits — confirming
+  the working-tree noise is still CRLF (Windows) vs LF (committed) only.
+
+### Updated
+
+- `AGENTS.md`: rolled Current State date to 2026-06-19; refreshed the git note
+  (HEAD `0214d9d` → `72f3fc9`, noting the intervening commits are automated docs
+  syncs only); footer → 2026-06-19. Phase content unchanged (no new features).
+- `README.md`: footer → 2026-06-19. Setup content already accurate; no other
+  changes.
+
+### Moved
+
+- None. Root holds only the three canonical/config docs (`AGENTS.md`,
+  `README.md`, `CLAUDE.md`). `IMPLEMENTATION_LOG.md`, `SDLC.md`, and all topic
+  guides already live under `docs/` (with `misc/` for `CODE_REVIEW.md` +
+  `page.xml`).
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- The sandbox Linux mount again served a stale/truncated snapshot of
+  `AGENTS.md`, `README.md`, and `IMPLEMENTATION_LOG.md` (footers dropped, files
+  cut off mid-sentence, the entire 2026-06-18 log entry missing) that did NOT
+  match the user's actual on-disk files, which were intact and current at
+  2026-06-18. All edits were made through the file tools (the user's real
+  folder), not the stale mount. Flagged again for the developer.
+- CRLF/LF diff noise persists. A `.gitattributes` with `* text=auto eol=lf`
+  would stop the working tree from showing all files as modified on Windows
+  checkouts. Not applied (out of scope for docs-sync).
+
+
+---
+
+## DOCS MAINTENANCE SYNC — 2026-06-20
+
+### Repo State Observed
+
+- Branch `main`, up to date with `origin/main`. HEAD `72f3fc9`
+  ("docs: sync canonical docs for 2026-06-18 run"), unchanged since the
+  2026-06-19 entry. No new commits — no source, dependency, schema, route, or
+  module changes since Phase 7.
+- Codebase remains at **Phase 7** (deterministic reusable asset candidates).
+  `package.json` (Next.js 16.2.7, React 19.2.4, deps unchanged), the 10
+  `supabase/migrations/`, and the `app/`, `components/`, `lib/` structure all
+  still match what `AGENTS.md` describes.
+- `git status` again reports every tracked file as "modified" while
+  `git diff --ignore-all-space --stat` shows only the doc edits — confirming
+  the working-tree noise is still CRLF (Windows) vs LF (committed) only. The
+  prior runs' docs edits (2026-06-18 committed; 2026-06-19 still uncommitted)
+  continue to accumulate in the working tree.
+
+### Updated
+
+- `AGENTS.md`: rolled Current State date to 2026-06-20; refreshed the git note
+  (HEAD unchanged at `72f3fc9`, working-tree reference → 2026-06-20); footer →
+  2026-06-20. Phase content unchanged (no new features landed).
+- `README.md`: footer → 2026-06-20. Setup content already accurate; no other
+  changes.
+
+### Moved
+
+- None. Root holds only the three canonical/config docs (`AGENTS.md`,
+  `README.md`, `CLAUDE.md`). `IMPLEMENTATION_LOG.md`, `SDLC.md`, and all topic
+  guides already live under `docs/` (with `misc/` for `CODE_REVIEW.md` +
+  `page.xml`).
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- The sandbox Linux mount again served a stale/truncated snapshot of
+  `AGENTS.md`, `README.md`, and `IMPLEMENTATION_LOG.md` (footers dropped, files
+  cut off mid-sentence, the 2026-06-18 and 2026-06-19 log entries missing — the
+  mount reported only 989 lines) that did NOT match the user's actual on-disk
+  files, which were intact and current at 2026-06-19. All reads for ground
+  truth and all edits were done through the file tools (the user's real
+  folder), not the stale mount. Git history (log/status/branch) from the mount
+  remains reliable; only working-tree file contents are stale. Flagged again
+  for the developer.
+- CRLF/LF diff noise persists. A `.gitattributes` with `* text=auto eol=lf`
+  would stop the working tree from showing all files as modified on Windows
+  checkouts. Not applied (out of scope for docs-sync).
