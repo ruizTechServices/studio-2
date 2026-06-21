@@ -1139,3 +1139,49 @@ as environment limits, not repository corruption.
 - CRLF/LF diff noise persists. A `.gitattributes` with `* text=auto eol=lf`
   would stop the working tree from showing all files as modified on Windows
   checkouts. Not applied (out of scope for docs-sync).
+
+## DOCS MAINTENANCE SYNC — 2026-06-21
+
+### Repo State Observed
+
+- Branch `main`, HEAD `d473d77` "docs: sync canonical docs for 2026-06-18 run".
+  HEAD advanced one automated docs-sync commit (`72f3fc9` -> `d473d77`) since the
+  prior run. No source-code commits.
+- The only commits since the Phase 7 work (`48d6b57`) are automated docs syncs.
+  Latest feature work remains Phase 7 (deterministic reusable asset candidates).
+- Working tree shows all 144 tracked files as "modified" with a perfectly
+  symmetric diff (24,604 insertions / 24,604 deletions). `git diff
+  --ignore-all-space --stat` produces no output, confirming the churn is purely
+  CRLF/LF line-ending differences from a Windows checkout, not real changes.
+  These edits remain uncommitted, as in prior runs.
+
+### Updated
+
+- `AGENTS.md` - bumped "Current State" header and footer to 2026-06-21; updated
+  the git note to reflect current HEAD `d473d77` and the 2026-06-21 working tree.
+  No structural/content changes needed: verified `app/`, `lib/`, `components/`,
+  `config/`, and the 10 `supabase/migrations/` against the code and all match the
+  documented Phase 7 state. Confirmed `lib/{client,server,middleware,utils}.ts`,
+  `app/{layout,page}.tsx`, the icon set, and the absence of a root `middleware.ts`
+  (still documented as "must be wired").
+- `README.md` - setup-only and accurate; bumped footer to 2026-06-21. No content
+  changes needed.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` is in `docs/`,
+  `AGENTS.md` and `README.md` are at root, `CLAUDE.md` is a one-line `@AGENTS.md`
+  pointer (not status - left in place). No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- CRLF/LF diff noise persists across all 144 tracked files. A `.gitattributes`
+  with `* text=auto eol=lf` would stop the working tree from showing every file
+  as modified on Windows checkouts. Not applied (out of scope for docs-sync).
+- Prior runs reported a stale/truncated sandbox Linux mount. This run the mount
+  was consistent: `git status`, file sizes, and the working-tree diff matched the
+  file-tool reads through the user's real folder. No stale-mount mismatch observed.
