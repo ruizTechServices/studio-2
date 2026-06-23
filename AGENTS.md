@@ -10,11 +10,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This is a **codebase intelligence studio** — not a generic SaaS app. The product goal is project recovery, system visualization, reusable asset extraction, and work-session continuity. It is a clean Next.js rebuild of `ruizTechStudio` with intentional architecture.
 
-## Current State (as of 2026-06-21)
+## Current State (as of 2026-06-23)
 
 Latest phase: **Phase 7 — deterministic reusable asset candidates**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The Phase 4–7 read migrations are **not yet applied to the linked Supabase project**.
 
-> Git note: the repository is healthy with intact history on `main` (HEAD `d473d77` "docs: sync canonical docs for 2026-06-18 run"). No source code has changed since the Phase 7 work — the only commits since are automated docs syncs, and HEAD advanced one docs-sync commit (`72f3fc9` → `d473d77`) since the prior run. The 2026-06-21 working tree still shows every tracked file as "modified" purely due to CRLF/LF line-ending differences; `git diff --ignore-all-space --stat` shows no real source changes (only the accumulated, still-uncommitted docs-sync edits).
+> Git note: the repository is healthy with intact history on `main` (HEAD `53a901c` "docs: sync canonical docs for 2026-06-21 run"). No source code has changed since the Phase 7 work — every commit since is an automated docs sync, and HEAD has not advanced since the prior run. The working tree still shows every tracked file as "modified" purely due to CRLF/LF line-ending differences; `git diff --ignore-all-space --stat` confirms no real source changes (only the still-uncommitted docs-sync edits). The previously-corrupted AGENTS.md closing fence and footer remain intact this run — no repair needed.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -192,4 +192,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-21
+> Last auto-updated: 2026-06-23

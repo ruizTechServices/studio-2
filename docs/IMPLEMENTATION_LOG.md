@@ -1185,3 +1185,70 @@ as environment limits, not repository corruption.
 - Prior runs reported a stale/truncated sandbox Linux mount. This run the mount
   was consistent: `git status`, file sizes, and the working-tree diff matched the
   file-tool reads through the user's real folder. No stale-mount mismatch observed.
+
+## 2026-06-22 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — repaired a corrupted file tail: the working tree had truncated the
+  closing ```` ``` ```` fence of the env-var block to a single stray backtick and dropped
+  the footer line. Restored the fence and footer. Refreshed the "Current State" header
+  to 2026-06-22 and updated the git note to reference the real current HEAD
+  (`53a901c`, the 2026-06-21 docs-sync commit) instead of the stale `d473d77`.
+  No status/architecture content changed — no source commits since the last run.
+- `README.md` — setup-only and accurate; bumped footer to 2026-06-22. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- `AGENTS.md` was the ONLY file with a real (non-EOL) content change in the working tree,
+  and that change was data loss (truncated footer/fence) rather than an intended edit —
+  now repaired. Likely a partial-write artifact from a prior run or editor.
+- CRLF/LF diff noise persists across all tracked files; `git diff --ignore-all-space`
+  shows no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this
+  on Windows checkouts. Not applied (out of scope for docs-sync).
+- No new source commits since 2026-06-21; HEAD remains `53a901c`. Codebase still at Phase 7.
+
+## 2026-06-23 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — refreshed the "Current State" header to 2026-06-23 and the footer to
+  2026-06-23. Updated the git note: the previously-corrupted closing fence/footer (repaired
+  in the 2026-06-22 run) remain intact this run, so the note no longer claims a repair was
+  needed and instead records that the only working-tree changes are the still-uncommitted
+  docs-sync edits. No status/architecture content changed — no source commits since the
+  last run. Verified against code: 10 migrations, 5 API routes, and the documented folder
+  structure all match the working tree.
+- `README.md` — setup-only and accurate; bumped footer to 2026-06-23. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- No real (non-EOL) content changes existed in the working tree this run beyond the
+  previously-uncommitted docs edits; the AGENTS.md tail corruption seen on 2026-06-22 did
+  not recur. The 2026-06-21/06-22 docs-sync edits remain uncommitted in the working tree.
+- CRLF/LF diff noise persists across all tracked files; `git diff --ignore-all-space`
+  shows no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this
+  on Windows checkouts. Not applied (out of scope for docs-sync).
+- No new source commits since 2026-06-21; HEAD remains `53a901c`. Codebase still at Phase 7.
