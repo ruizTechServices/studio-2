@@ -1252,3 +1252,89 @@ as environment limits, not repository corruption.
   shows no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this
   on Windows checkouts. Not applied (out of scope for docs-sync).
 - No new source commits since 2026-06-21; HEAD remains `53a901c`. Codebase still at Phase 7.
+
+## 2026-06-24 — Automated docs sync
+
+### Repaired
+
+- `AGENTS.md` and `docs/IMPLEMENTATION_LOG.md` — the working-tree copies were truncated
+  mid-line (AGENTS.md 190/195 lines, ending at `OLLAMA_RESERVED_RESPONSE_TOKENS`;
+  IMPLEMENTATION_LOG.md 1219/1254 lines), a recurrence of the partial-write artifact last
+  seen on 2026-06-22. Both were the only files with real (non-EOL) working-tree changes.
+  Restored both from the intact committed HEAD (`64d8081`) by overwriting in place
+  (`git checkout` was blocked by the mount's unlink restriction) before applying this run's
+  edits. No content was lost.
+
+### Updated
+
+- `AGENTS.md` — bumped "Current State" header and footer to 2026-06-24. Corrected the git
+  note: HEAD is now `64d8081` ("docs: sync canonical docs for 2026-06-23 run"), not the
+  stale `53a901c`, and the note now records the truncation-and-restore that occurred this
+  run. Verified against code: 10 migrations, 5 API routes (ai/chat, ai/health, log,
+  projects/import, scans/[scanId]), 4 page routes, Next 16.2.7 / React 19.2.4 / Tailwind 4,
+  and the documented folder structure all match the working tree. No status/architecture
+  content changed — no source commits since Phase 7.
+- `README.md` — setup-only and accurate (scripts, env vars, migrations all match); bumped
+  footer to 2026-06-24. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Anomalies
+
+- The AGENTS.md/IMPLEMENTATION_LOG.md tail truncation recurred this run (it had skipped the
+  2026-06-23 run). Root cause appears to be a partial write when the Windows-mounted files
+  are rewritten; recommend committing the canonical docs after each sync so HEAD always
+  holds a clean copy to restore from.
+- CRLF/LF diff noise persists across all 144 other tracked files; `git diff
+  --ignore-all-space` shows no real source changes. A `.gitattributes` (`* text=auto
+  eol=lf`) would stop this on Windows checkouts. Not applied (out of scope for docs-sync).
+- No new source commits since Phase 7; HEAD is `64d8081`. Codebase still at Phase 7. The
+  Phase 4–7 read/storage migrations remain unapplied to the linked Supabase project.
+
+## 2026-06-25 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — bumped "Current State" header and footer to 2026-06-25. Refreshed the git
+  note: start-of-run HEAD `64d8081` ("docs: sync canonical docs for 2026-06-23 run"), no
+  source commits since Phase 7, `package.json` (Next.js 16.2.7 / React 19.2.4 / Tailwind 4)
+  and the 10 `supabase/migrations/` files unchanged. Note now records that this run commits
+  the canonical docs so HEAD holds a clean copy (resolving the recurring partial-write
+  artifact). Re-verified against code: 10 migrations, 5 API routes (ai/chat, ai/health,
+  log, projects/import, scans/[scanId]), 4 page routes, and the documented folder structure
+  all match the working tree. No status/architecture content changed.
+- `README.md` — setup-only and accurate (scripts, env vars, migrations match); bumped
+  footer to 2026-06-25. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Notes
+
+- The prior 2026-06-24 sync edited the canonical docs but was never committed; this run was
+  the first to land them in git. Per the standing recommendation, committing each sync stops
+  HEAD from drifting and prevents the Windows-mount truncation artifact from recurring.
+
+### Anomalies
+
+- CRLF/LF diff noise persists across ~144 other tracked files; `git diff --ignore-all-space`
+  shows no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this on
+  Windows checkouts — still not applied (out of scope for docs-sync). Only the canonical
+  docs were staged for this run's commit; the EOL-churn files were left untouched.
