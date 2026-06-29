@@ -1338,3 +1338,180 @@ as environment limits, not repository corruption.
   shows no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this on
   Windows checkouts — still not applied (out of scope for docs-sync). Only the canonical
   docs were staged for this run's commit; the EOL-churn files were left untouched.
+
+## 2026-06-26 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — bumped "Current State" header and footer to 2026-06-26. Refreshed the git
+  note: start-of-run HEAD `3dfeff5` ("docs: sync canonical docs for 2026-06-25 run"), no
+  source commits since Phase 7; `package.json` (Next.js 16.2.7 / React 19.2.4 / Tailwind 4)
+  and the 10 `supabase/migrations/` files unchanged. Re-verified against code: 10 migrations,
+  5 API routes (ai/chat, ai/health, log, projects/import, scans/[scanId]), 4 page routes, and
+  the documented folder structure all match the working tree. No status/architecture content
+  changed. The note now records that this run could not commit (see Anomalies).
+- `README.md` — setup-only and accurate (scripts, env vars, migrations match); bumped footer
+  to 2026-06-26. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Notes
+
+- Working-tree canonical docs were updated in place via file edits and are correct.
+
+### Anomalies
+
+- Could not commit this run. A stale `.git/index.lock` (0 bytes, created Jun 26 11:34) was
+  unremovable — `rm` and git both return "Operation not permitted" on the Windows mount —
+  which blocks all staging and commits. Separately, the git index already held a truncated
+  `AGENTS.md` (footer cut to `> Last auto-up`, no trailing newline) staged by an interrupted
+  prior run; this confirms the partial-write/truncation artifact recurred, but it is confined
+  to the locked index — the working-tree file is intact and correct. Recommended manual fix on
+  the host: delete `.git/index.lock`, run `git restore --staged AGENTS.md`, then commit the
+  working-tree docs normally.
+- CRLF/LF diff noise persists across ~144 tracked files; `git diff --ignore-all-space` shows
+  no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this on Windows
+  checkouts — still not applied (out of scope for docs-sync).
+
+## 2026-06-27 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — bumped "Current State" header and footer to 2026-06-27. Refreshed the git
+  note: HEAD is still `3dfeff5` ("docs: sync canonical docs for 2026-06-25 run"), unchanged
+  since the 2026-06-25 commit, with `main` 1 commit ahead of `origin/main`. No source commits
+  since Phase 7; `package.json` (Next.js 16.2.7 / React 19.2.4 / Tailwind 4) and the 10
+  `supabase/migrations/` files unchanged. Re-verified against code: 10 migrations, 5 API routes
+  (ai/chat, ai/health, log, projects/import, scans/[scanId]), 4 page routes, and the documented
+  folder structure all match the working tree. No status/architecture content changed.
+- `README.md` — setup-only and accurate (scripts, env vars, migrations match); bumped footer
+  to 2026-06-27. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Notes
+
+- Codebase state is functionally unchanged since the 2026-06-26 run: same HEAD, no source
+  diffs (only CRLF noise), same blocked commit. Working-tree canonical docs were updated in
+  place via file edits and are correct.
+
+### Anomalies
+
+- Could not commit this run, identical to 2026-06-26. The same stale `.git/index.lock`
+  (0 bytes, created Jun 26 11:34) is still unremovable — `rm` and git both return "Operation
+  not permitted" on the Windows mount — blocking all staging/commits. The git index still
+  holds a truncated `AGENTS.md` (footer cut to `> Last auto-up`, no trailing newline) staged
+  by an interrupted prior run; the artifact is confined to the locked index, while the
+  working-tree file is intact and correct. Required manual fix on the host: delete
+  `.git/index.lock`, run `git restore --staged AGENTS.md`, then commit the working-tree docs.
+- CRLF/LF diff noise persists across ~144 tracked files; `git diff --ignore-all-space` shows
+  no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this on Windows
+  checkouts — still not applied (out of scope for docs-sync).
+
+## 2026-06-28 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — bumped "Current State" header and footer to 2026-06-28. Re-verified every
+  documented fact against the working tree: HEAD is still `3dfeff5` ("docs: sync canonical
+  docs for 2026-06-25 run"), `main` 1 commit ahead of `origin/main`, no source commits since
+  Phase 7. Confirmed 10 `supabase/migrations/` files, 5 API routes (ai/chat, ai/health, log,
+  projects/import, scans/[scanId]), 4 `page.tsx` routes, and `package.json` (Next.js 16.2.7 /
+  React 19.2.4 / Tailwind 4) all unchanged and matching the documented structure. The git note
+  remains accurate (same lock blocker, same staged-index artifact). No status/architecture
+  content changed.
+- `README.md` — setup-only and accurate (prerequisites, scripts, env vars, migrations match);
+  bumped footer to 2026-06-28. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Notes
+
+- Codebase state is functionally unchanged since the 2026-06-27 run: same HEAD, no real source
+  diffs (only CRLF noise), same blocked commit. Working-tree canonical docs were updated in
+  place via file edits and are correct.
+
+### Anomalies
+
+- Could not commit this run, identical to the prior three runs. The same stale
+  `.git/index.lock` (0 bytes, created Jun 26 11:34) is still unremovable — `rm` returns
+  "Operation not permitted" on the Windows mount — blocking all staging/commits. The git index
+  still holds a truncated `AGENTS.md` (footer cut to `> Last auto-up`, no trailing newline)
+  staged by an interrupted prior run; the artifact is confined to the locked index, while the
+  working-tree file is intact and correct. Required manual fix on the host: delete
+  `.git/index.lock`, run `git restore --staged AGENTS.md`, then commit the working-tree docs.
+- CRLF/LF diff noise persists across ~144 tracked files; `git diff --ignore-all-space` shows
+  no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this on Windows
+  checkouts — still not applied (out of scope for docs-sync).
+
+## 2026-06-29 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — bumped "Current State" header and footer to 2026-06-29. Re-verified every
+  documented fact against git and the working tree: HEAD is still `3dfeff5` ("docs: sync
+  canonical docs for 2026-06-25 run"), `main` 1 commit ahead of `origin/main`, no source
+  commits since Phase 7. Confirmed `package.json` (Next.js 16.2.7 / React 19.2.4 / Tailwind 4),
+  10 `supabase/migrations/` files, 5 API routes (ai/chat, ai/health, log, projects/import,
+  scans/[scanId]), and 4 `page.tsx` routes all unchanged and matching the documented structure.
+  Git note remains accurate (same lock blocker, same staged-index artifact). No status or
+  architecture content changed.
+- `README.md` — setup-only and accurate (prerequisites, install/run, env var names, scripts,
+  migrations, deployment all match the code); bumped footer to 2026-06-29. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Notes
+
+- Codebase state is functionally unchanged since the 2026-06-28 run: same HEAD, no real source
+  diffs (only CRLF noise), same blocked commit. Working-tree canonical docs were updated in
+  place via file edits and are correct.
+
+### Anomalies
+
+- Could not commit this run, identical to the prior runs. The same stale `.git/index.lock`
+  (0 bytes, created Jun 26 11:34) is still unremovable — `rm` returns "Operation not permitted"
+  on the Windows mount — blocking all staging/commits. The git index still holds a truncated
+  `AGENTS.md` (footer cut to `> Last auto-up`, no trailing newline) staged by an interrupted
+  prior run; the artifact is confined to the locked index, while the working-tree file is
+  intact and correct. Required manual fix on the host: delete `.git/index.lock`, run
+  `git restore --staged AGENTS.md`, then commit the working-tree docs.
+- CRLF/LF diff noise persists across ~144 tracked files; `git diff --ignore-all-space` shows
+  no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this on Windows
+  checkouts — still not applied (out of scope for docs-sync).
