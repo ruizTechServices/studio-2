@@ -1515,3 +1515,44 @@ as environment limits, not repository corruption.
 - CRLF/LF diff noise persists across ~144 tracked files; `git diff --ignore-all-space` shows
   no real source changes. A `.gitattributes` (`* text=auto eol=lf`) would stop this on Windows
   checkouts — still not applied (out of scope for docs-sync).
+
+## 2026-06-30 — Automated docs sync
+
+### Updated
+
+- `AGENTS.md` — bumped "Current State" header and footer to 2026-06-30 and rewrote the git
+  note to reflect resolved state. The prior `.git/index.lock` blocker is **gone**: the lock
+  no longer exists, the index is clean (no staged truncated `AGENTS.md`), and the 2026-06-29
+  docs sync committed successfully — HEAD is now `cfb0756` ("docs: sync canonical docs for
+  2026-06-29 run"). `main` is 2 commits ahead of `origin/main` (unpushed docs-sync commits).
+  Re-verified every documented fact: `package.json` (Next.js 16.2.7 / React 19.2.4 /
+  Tailwind 4), 10 `supabase/migrations/` files, 5 API routes (ai/chat, ai/health, log,
+  projects/import, scans/[scanId]) and 4 `page.tsx` routes all unchanged and matching the
+  documented structure. No status or architecture content changed.
+- `README.md` — setup-only and accurate (prerequisites, install/run, env var names, scripts,
+  migrations, deployment all match the code); bumped footer to 2026-06-30. No content changes.
+
+### Moved
+
+- None. Canonical roles already correct: `IMPLEMENTATION_LOG.md` and all topic guides
+  (`INTAKE-WORKER`, `LOGGING`, `OLLAMA`, `PROJECT-INTAKE`, `SDLC`, `VISUAL-ASSETS`) live in
+  `docs/`; `AGENTS.md`/`README.md` at root; `CLAUDE.md` is a one-line `@AGENTS.md` pointer.
+  No NON-UPDATABLE root .md files exist.
+
+### Migrated
+
+- None. No status narration found outside `AGENTS.md`.
+
+### Notes
+
+- Codebase is functionally unchanged since Phase 7: `git diff --ignore-all-space HEAD` is
+  empty (only CRLF/LF noise across ~144 tracked files). Working-tree canonical docs were
+  updated in place via file edits.
+
+### Anomalies
+
+- The index.lock / staged-truncated-AGENTS.md blocker reported in the 2026-06-16 → 2026-06-29
+  entries is now **cleared** — those notes are resolved as of this run.
+- CRLF/LF diff noise still persists across ~144 tracked files. A root `.gitattributes`
+  (`* text=auto eol=lf`) would stop this on Windows checkouts — still not applied (out of
+  scope for docs-sync).

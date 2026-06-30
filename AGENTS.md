@@ -10,11 +10,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This is a **codebase intelligence studio** — not a generic SaaS app. The product goal is project recovery, system visualization, reusable asset extraction, and work-session continuity. It is a clean Next.js rebuild of `ruizTechStudio` with intentional architecture.
 
-## Current State (as of 2026-06-29)
+## Current State (as of 2026-06-30)
 
 Latest phase: **Phase 7 — deterministic reusable asset candidates**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The Phase 4–7 read migrations are **not yet applied to the linked Supabase project**.
 
-> Git note: the repository is healthy with intact history on `main` (HEAD `3dfeff5` "docs: sync canonical docs for 2026-06-25 run" — unchanged since the 2026-06-25 run; `main` is 1 commit ahead of `origin/main`). No source code has changed since the Phase 7 work — every commit since is an automated docs sync, and `package.json` (Next.js 16.2.7, React 19.2.4, Tailwind 4) and the 10 `supabase/migrations/` files are unchanged. The working tree shows every tracked file as "modified" purely due to CRLF/LF line-ending differences; `git diff --ignore-all-space` confirms no real source changes. This run could **not** commit either: the same stale `.git/index.lock` (0 bytes, created Jun 26 11:34) remains unremovable — `rm` and git both return "Operation not permitted" on the Windows mount — and the index still holds a truncated AGENTS.md (`> Last auto-up`, no trailing newline) staged by an interrupted prior run. The working-tree canonical docs were updated in place and are correct; the partial-write/truncation artifact lives only in the locked index. Required manual fix on the host: delete `.git/index.lock`, run `git restore --staged AGENTS.md`, then commit the working-tree docs normally to reconcile HEAD.
+> Git note: the repository is healthy with intact history on `main` (HEAD `cfb0756` "docs: sync canonical docs for 2026-06-29 run"; `main` is 2 commits ahead of `origin/main` — the unpushed local docs-sync commits). The prior `.git/index.lock` blocker is **resolved**: the stale lock is gone, the index is clean (no staged truncated `AGENTS.md`), and the 2026-06-29 docs sync committed successfully as the current HEAD. No source code has changed since the Phase 7 work — every commit since is an automated docs sync, and `package.json` (Next.js 16.2.7, React 19.2.4, Tailwind 4) and the 10 `supabase/migrations/` files are unchanged. The working tree still shows every tracked file as "modified" purely due to CRLF/LF line-ending differences; `git diff --ignore-all-space` confirms no real source changes. A root `.gitattributes` (`* text=auto eol=lf`) would eliminate this Windows-checkout noise but has not been added (out of scope for docs-sync). This run's canonical-doc edits live in the working tree and should be committed (and `origin/main` is 2 commits behind — a push will reconcile the remote).
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -192,4 +192,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-29
+> Last auto-updated: 2026-06-30
