@@ -6,6 +6,7 @@ import {
   GitPullRequestCreate,
   History,
   LayoutDashboard,
+  Library,
   Map,
   Settings,
 } from 'lucide-react'
@@ -23,6 +24,7 @@ const navigationIcons = {
   'Import Repo': GitPullRequestCreate,
   'System Map': Map,
   'Reusable Assets': Boxes,
+  Shelves: Library,
   'Work Sessions': History,
   Settings,
 } as const

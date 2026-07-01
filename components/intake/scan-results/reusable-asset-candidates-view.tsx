@@ -1,5 +1,6 @@
 import { PackageSearch } from 'lucide-react'
 
+import { PromoteCandidateButton } from '@/components/shelves/promote-candidate-button'
 import type { ReusableAssetSummary } from '@/lib/intake/reusable-assets/contracts'
 
 export function ReusableAssetCandidatesView({
@@ -51,6 +52,9 @@ export function ReusableAssetCandidatesView({
                   </li>
                 ))}
               </ul>
+              <div className="mt-3">
+                <PromoteCandidateButton candidate={candidate} />
+              </div>
             </article>
           ))}
         </div>

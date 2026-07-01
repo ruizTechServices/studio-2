@@ -12,9 +12,7 @@ This is a **codebase intelligence studio** — not a generic SaaS app. The produ
 
 ## Current State (as of 2026-07-01)
 
-Latest phase: **Phase 7 operational closeout**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The linked Supabase project has all Phase 4–7 read/storage migrations applied, plus the Phase 7 advisor-triage migration. Security advisors are clean; performance advisors currently report only low-traffic unused-index INFO findings.
-
-> Git note: the repository is healthy with intact history on `main` (HEAD `155e574` "chore: updated docs", matching `origin/main` before this run). The current working tree intentionally contains the Phase 7 advisor-triage migration and canonical documentation updates. No application source code has changed since Phase 7.
+Latest phase: **Phase 8 shelves (durable reusable asset library)**. Phase 7 candidates can now be promoted into `shelf_assets` — a durable, cross-scan, lexically searchable library of provenance pointers (owner/repo/commit/path/lines; no source contents). The Phase 8 migration (`20260701120000_create_phase_8_shelves.sql`) is checked in but **not yet applied to the linked Supabase project** — apply it and re-run advisors before exercising the shelf surface. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. See `docs/SHELVES.md` for the pointer-model rationale and the phased roadmap (retrieval-on-demand → semantic search → workspace → marketplace).
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -58,6 +56,10 @@ Completed since initial scaffold:
 - `lib/intake/reusable-assets/` + `components/intake/scan-results/reusable-asset-candidates-view.tsx` — pure deterministic classifier scoring reusable asset candidates from existing file/symbol metadata, plus a compact candidates view (Phase 7)
 - `supabase/migrations/20260615000000_create_phase_7_reusable_asset_candidates.sql` — private metadata-only candidate persistence, atomic finalization verification, and a bounded service-role candidate-summary RPC
 - `supabase/migrations/20260701025502_phase_7_advisor_triage.sql` — explicit deny-all client RLS policies for private intake/log tables and an index for `scan_reusable_asset_candidates.project_id`
+- `lib/shelves/` + `components/shelves/` + `app/dashboard/shelves/page.tsx` — Phase 8 durable shelf library: candidate promotion, versioned provenance-pointer assets, bounded lexical search, facet UI, and an "Add to shelf" action on scan-results candidate cards
+- `app/api/shelves/route.ts` + `app/api/shelves/promote/route.ts` — local-only shelf search and promotion endpoints
+- `supabase/migrations/20260701120000_create_phase_8_shelves.sql` — `shelf_assets` table (deny-all RLS, GIN-indexed tsvector search, dormant marketplace columns) with service-role-only promote/search RPCs
+- `docs/SHELVES.md` — shelf architecture, pointer-model rationale, and Phases 9–12 roadmap
 
 ## Tech Stack
 
@@ -146,6 +148,7 @@ studio-2/
 - **AI**: never call Ollama directly from route handlers. Use `lib/ai/ollama-client.ts` (`chatWithOllama`, `getOllamaModels`). Validate requests with `lib/ai/model-policy.ts` first. Build the message array with `lib/ai/context-builder.ts`. See `docs/OLLAMA.md`.
 - **Project intake**: intake is local-only and production-hidden. Validate through `lib/intake/`, never fetch submitted URLs directly, never expose service-role access to clients, and never persist or log source contents. See `docs/PROJECT-INTAKE.md`.
 - **Scan results, system-map seed, symbols, and reusable-asset candidates**: derive compact deterministic models from private `scan_files`/symbol metadata only. Source is parsed only in bounded worker memory and is never persisted, logged, returned, or written to disk. No graph canvas, AI, embeddings, or semantic search. Read through `lib/intake/results/`; build through `lib/intake/system-map/` (P5), `lib/intake/symbols/` (P6 TS-compiler-API extraction), and `lib/intake/reusable-assets/` (P7 candidate scoring). Candidates require review and are not guaranteed reusable.
+- **Shelves (P8)**: shelf assets are provenance pointers (owner/repo/commit/path/lines) plus deterministic metadata — never source contents. Promotion is an explicit human action from scan results. Validate through `lib/shelves/validation.ts`, persist and search only through `lib/shelves/repository.ts` RPC wrappers, and keep the surface behind `isProjectIntakeEnabled()`. Marketplace columns (`visibility`, `price_cents`, `published_at`) stay dormant until an auth + billing phase. See `docs/SHELVES.md`.
 - **Config**: site metadata → `config/site.ts` (`siteConfig`). Dashboard nav items → `config/navigation.ts` (`dashboardNavigation`).
 - **Visual assets**: use `BrandLogo` for in-product branding (static light/dark variants only when assets leave the application), static assets from `public/brand/` and `public/illustrations/`, and reusable motion from `components/animations/` — no one-off motion for feature pages. All motion must respect `prefers-reduced-motion`. Meaningful images require useful alt text; decorative animations must be hidden from assistive technology. See `docs/VISUAL-ASSETS.md`.
 - **Testing**: Vitest (`npm run test`). Test files co-located with source (`.test.ts`). Coverage via `npm run test:coverage`.
@@ -166,10 +169,12 @@ The studio is a tool developers use when inheriting, recovering, or deeply under
 
 ## Next Steps (in order)
 
-1. Treat the remaining performance advisor `unused_index` INFO findings as deferred until real scan/log traffic can prove whether any index is waste.
-2. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
-3. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
-4. With deterministic symbol and reusable-asset metadata now persisted and advisor triage complete, design the next layer (relationships / system-map graph or work-session memory) before introducing AI summaries, embeddings, or semantic search.
+1. Apply `20260701120000_create_phase_8_shelves.sql` to the linked Supabase project, then run security and performance advisors.
+2. Exercise the shelf loop end to end locally: scan a repo → promote candidates → search `/dashboard/shelves` → re-scan at a newer commit and confirm version bumps.
+3. Design Phase 9 retrieval-on-demand (bounded fetch of a shelf asset's file at its pinned commit, sliced in memory, never persisted) — see `docs/SHELVES.md`.
+4. Treat the remaining performance advisor `unused_index` INFO findings as deferred until real scan/log traffic can prove whether any index is waste.
+5. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
+6. After retrieval-on-demand is stable, add semantic search (pgvector + local Ollama embeddings over `search_text`) before any workspace or marketplace surface.
 
 ## Environment Variables
 
