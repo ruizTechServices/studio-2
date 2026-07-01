@@ -10,11 +10,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This is a **codebase intelligence studio** — not a generic SaaS app. The product goal is project recovery, system visualization, reusable asset extraction, and work-session continuity. It is a clean Next.js rebuild of `ruizTechStudio` with intentional architecture.
 
-## Current State (as of 2026-06-30)
+## Current State (as of 2026-07-01)
 
-Latest phase: **Phase 7 — deterministic reusable asset candidates**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The Phase 4–7 read migrations are **not yet applied to the linked Supabase project**.
+Latest phase: **Phase 7 operational closeout**. Phases 6 (deterministic JS/TS symbol scanning) and 7 (reusable asset candidate detection) have landed on top of the Phase 5 system-map seed. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. The linked Supabase project has all Phase 4–7 read/storage migrations applied, plus the Phase 7 advisor-triage migration. Security advisors are clean; performance advisors currently report only low-traffic unused-index INFO findings.
 
-> Git note: the repository is healthy with intact history on `main` (HEAD `cfb0756` "docs: sync canonical docs for 2026-06-29 run"; `main` is 2 commits ahead of `origin/main` — the unpushed local docs-sync commits). The prior `.git/index.lock` blocker is **resolved**: the stale lock is gone, the index is clean (no staged truncated `AGENTS.md`), and the 2026-06-29 docs sync committed successfully as the current HEAD. No source code has changed since the Phase 7 work — every commit since is an automated docs sync, and `package.json` (Next.js 16.2.7, React 19.2.4, Tailwind 4) and the 10 `supabase/migrations/` files are unchanged. The working tree still shows every tracked file as "modified" purely due to CRLF/LF line-ending differences; `git diff --ignore-all-space` confirms no real source changes. A root `.gitattributes` (`* text=auto eol=lf`) would eliminate this Windows-checkout noise but has not been added (out of scope for docs-sync). This run's canonical-doc edits live in the working tree and should be committed (and `origin/main` is 2 commits behind — a push will reconcile the remote).
+> Git note: the repository is healthy with intact history on `main` (HEAD `155e574` "chore: updated docs", matching `origin/main` before this run). The current working tree intentionally contains the Phase 7 advisor-triage migration and canonical documentation updates. No application source code has changed since Phase 7.
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -57,6 +57,7 @@ Completed since initial scaffold:
 - `supabase/migrations/20260614000000_create_phase_6_symbol_scanning.sql` — private metadata-only symbol storage, lease-checked batches, atomic count verification, and a service-role-only symbol-summary read RPC
 - `lib/intake/reusable-assets/` + `components/intake/scan-results/reusable-asset-candidates-view.tsx` — pure deterministic classifier scoring reusable asset candidates from existing file/symbol metadata, plus a compact candidates view (Phase 7)
 - `supabase/migrations/20260615000000_create_phase_7_reusable_asset_candidates.sql` — private metadata-only candidate persistence, atomic finalization verification, and a bounded service-role candidate-summary RPC
+- `supabase/migrations/20260701025502_phase_7_advisor_triage.sql` — explicit deny-all client RLS policies for private intake/log tables and an index for `scan_reusable_asset_candidates.project_id`
 
 ## Tech Stack
 
@@ -123,10 +124,11 @@ studio-2/
 │   └── utils.ts                    # cn() utility
 ├── scripts/intake-worker.ts        # CLI entry — worker:intake / worker:intake:once
 ├── supabase/
-│   ├── migrations/                 # 10 migrations: logs, intake foundation, grants,
+│   ├── migrations/                 # 11 migrations: logs, intake foundation, grants,
 │   │                               # worker foundation, claim fix, phase 3 archive,
 │   │                               # phase 4 read, phase 5 system-map seed read,
-│   │                               # phase 6 symbol scanning, phase 7 reusable asset candidates
+│   │                               # phase 6 symbol scanning, phase 7 reusable asset candidates,
+│   │                               # phase 7 advisor triage
 │   └── sql/enable_logs_retention.sql # pg_cron daily purge (logs > 30d) — opt-in
 ├── docs/                           # IMPLEMENTATION_LOG, INTAKE-WORKER, LOGGING, OLLAMA,
 │                                   # PROJECT-INTAKE, SDLC, VISUAL-ASSETS, misc/
@@ -164,10 +166,10 @@ The studio is a tool developers use when inheriting, recovering, or deeply under
 
 ## Next Steps (in order)
 
-1. Apply the Phase 4–7 read/storage migrations to the linked Supabase project and run security/performance advisors.
+1. Treat the remaining performance advisor `unused_index` INFO findings as deferred until real scan/log traffic can prove whether any index is waste.
 2. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
 3. Keep local and remote Supabase migration history aligned and run advisors after schema changes.
-4. With deterministic symbol and reusable-asset metadata now persisted, design the next layer (relationships / system-map graph or work-session memory) before introducing AI summaries, embeddings, or semantic search.
+4. With deterministic symbol and reusable-asset metadata now persisted and advisor triage complete, design the next layer (relationships / system-map graph or work-session memory) before introducing AI summaries, embeddings, or semantic search.
 
 ## Environment Variables
 
@@ -192,4 +194,4 @@ OLLAMA_RESERVED_RESPONSE_TOKENS=256
 OLLAMA_CHAT_TIMEOUT_MS=120000
 ```
 
-> Last auto-updated: 2026-06-30
+> Last auto-updated: 2026-07-01

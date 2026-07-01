@@ -51,16 +51,17 @@ and reusable asset candidates. Source is parsed only in bounded worker memory;
 source contents, AI summaries, embeddings, semantic search, and graph
 visualization have not started.
 
-Operational status: linked Supabase Phase 4-7 migrations are verified applied,
-and security/performance advisors have run through the connected Supabase
-account. The local Supabase CLI account still cannot access advisor endpoints,
-but the connector account can see project `lyclwqvmbhiwlxffcnbw` and retrieve
-advisor results.
+Operational status: linked Supabase Phase 4-7 migrations are verified applied.
+The Phase 7 advisor-triage migration is also applied remotely. Security
+advisors are clean, and the previous unindexed foreign-key performance finding
+is fixed. The only remaining advisor output is low-traffic `unused_index` INFO
+noise, intentionally deferred until real scan/log traffic can prove an index is
+waste.
 
-Next dependency: triage the advisor INFO findings before Phase 8 planning. Do
-not build Phase 8, authentication flows, AI summaries, embeddings, semantic
-search, graph visualization, or agentic automation until this Phase 7
-operational closeout is complete.
+Next dependency: decide log-retention policy and design the next deterministic
+layer before Phase 8 implementation. Do not build authentication flows, AI
+summaries, embeddings, semantic search, graph visualization, or agentic
+automation before that design decision is explicit.
 
 ## CURRENT MILESTONE SNAPSHOT - 2026-07-01
 
@@ -78,39 +79,32 @@ Completed:
 - Phase 5 metadata-only system-map seed generation and compact view
 - Phase 6 TypeScript-compiler-API JS/TS symbol extraction and summary view
 - Phase 7 deterministic reusable asset candidate classification and summary view
-- Ten Supabase migrations on disk through
-  `20260615000000_create_phase_7_reusable_asset_candidates.sql`
+- Eleven Supabase migrations on disk through
+  `20260701025502_phase_7_advisor_triage.sql`
 
 Verified:
 
-- `main` is current at `9b82fdc688914ba98d775f75b4edd97bd71fff02`
-- `git status --short` is clean; no tracked CRLF/LF status noise is present
+- `main` is current at `155e5742a46b2558afe7bf9a12eb068f6123e8cc`
 - `npm ci` succeeded
 - `npm run lint` passed
 - `npx tsc --noEmit` passed
 - `npm run test` passed: 41 files, 257 tests
 - `npm run build` passed on Next.js 16.2.7
 - Linked Supabase ref is `lyclwqvmbhiwlxffcnbw`
-- `supabase migration list --linked` shows all 10 local migrations also remote,
+- `supabase migration list --linked` shows all 11 local migrations also remote,
   including Phase 4 `20260612010000`, Phase 5 `20260612020000`,
-  Phase 6 `20260614000000`, and Phase 7 `20260615000000`
-- `supabase db push --dry-run --linked` reports the remote database is up to date
+  Phase 6 `20260614000000`, Phase 7 `20260615000000`, and advisor triage
+  `20260701025502`
+- `supabase db push --linked` applied `20260701025502_phase_7_advisor_triage.sql`
 - Connected Supabase account sees `ruizTechStudio` / `lyclwqvmbhiwlxffcnbw` as
   `ACTIVE_HEALTHY`
-- Supabase advisors ran through the connector: security returned 7 INFO lints;
-  performance returned 12 INFO lints
+- Supabase security advisors now return zero lints through the connector
+- Supabase performance advisors now return only `unused_index` INFO findings
 
-Needs triage:
+Deferred:
 
-- Security advisors report `rls_enabled_no_policy` INFO findings for `logs`,
-  `projects`, `scan_events`, `scan_files`, `scan_reusable_asset_candidates`,
-  `scan_symbols`, and `scans`.
-- Performance advisors report one `unindexed_foreign_keys` INFO finding for
-  `scan_reusable_asset_candidates_project_id_fkey` and 11 `unused_index` INFO
-  findings across low-traffic scan/log indexes.
-- The local Supabase CLI account still returns `403` for advisor endpoints and
-  `supabase projects list` still omits `lyclwqvmbhiwlxffcnbw`; use the
-  connected Supabase account for advisor review until CLI auth is corrected.
+- Performance advisors report `unused_index` INFO findings across low-traffic
+  scan/log indexes. Keep the indexes until real traffic proves they are waste.
 
 Not started:
 
@@ -1623,3 +1617,72 @@ as environment limits, not repository corruption.
   remote Phase 4-7 migration status.
 - Phase 8 remains deferred until the advisor INFO findings are accepted as intentional or
   addressed with narrowly scoped migrations.
+
+## 2026-07-01 - Phase 7 advisor triage migration
+
+### Updated
+
+- Added `supabase/migrations/20260701025502_phase_7_advisor_triage.sql`.
+  The migration keeps intake/log tables private by adding explicit deny-all
+  client RLS policies for `anon` and `authenticated`, repeats direct client
+  table revokes, and adds `scan_reusable_asset_candidates_project_id_idx`.
+- Updated `AGENTS.md` and this implementation log so canonical planning no
+  longer claims Phase 4-7 migrations are unapplied or that advisor triage is
+  still blocked.
+- Public APIs, route contracts, TypeScript interfaces, worker contracts, and
+  browser data surfaces were not changed.
+
+### Verified
+
+- `supabase db push --dry-run --linked` planned only
+  `20260701025502_phase_7_advisor_triage.sql`.
+- `supabase db push --linked` applied
+  `20260701025502_phase_7_advisor_triage.sql` to project
+  `lyclwqvmbhiwlxffcnbw`.
+- `supabase migration list --linked` shows 11 local migrations matched remotely,
+  including `20260701025502`.
+- Remote SQL verification shows each advisor-flagged private table has RLS
+  enabled, exactly one policy, and no `anon` or `authenticated` table grants.
+- Remote SQL verification shows
+  `scan_reusable_asset_candidates_project_id_idx` exists on
+  `public.scan_reusable_asset_candidates(project_id)`.
+- Supabase security advisors now return zero lints through the connected
+  Supabase account.
+- Supabase performance advisors no longer report the previous unindexed
+  `scan_reusable_asset_candidates_project_id_fkey` finding.
+
+### Deferred
+
+- Performance advisors still report `unused_index` INFO findings. These are
+  expected on a new, low-traffic system and should not be fixed by dropping
+  query-shaping indexes until real scan/log traffic proves they are waste.
+
+## 2026-07-01 - Automated docs-sync verification run
+
+### Verified
+
+- Ran the automated documentation-sync task. Confirmed the three canonical
+  documents hold their fixed roles: `AGENTS.md` (status, root), `README.md`
+  (setup, root), `docs/IMPLEMENTATION_LOG.md` (history).
+- Cross-checked `AGENTS.md` against the live codebase: 11 `supabase/migrations/`
+  files (through `20260701025502_phase_7_advisor_triage.sql`), `package.json`
+  (Next.js 16.2.7, React 19.2.4, Tailwind 4), and the documented `app/`,
+  `components/`, `lib/`, `config/`, `scripts/`, `supabase/` structure all match.
+  No edits to `AGENTS.md` were required this run.
+- `git log` shows no new application source since the Phase 7 work; recent
+  commits are automated docs syncs. Working tree still shows tracked files as
+  modified due to CRLF/LF line-ending differences only (`git diff
+  --ignore-all-space` confirms no substantive source changes).
+
+### Updated
+
+- Bumped the `README.md` footer to `2026-07-01`. `README.md` remains setup-only
+  with the status pointer to `AGENTS.md`; no status narration present.
+
+### Notes
+
+- No root .md files required migration or relocation. Only `AGENTS.md`,
+  `CLAUDE.md` (an `@AGENTS.md` include), and `README.md` live in the root;
+  `IMPLEMENTATION_LOG.md` is already under `docs/`.
+- The earlier `2026-07-01 - Phase 7 advisor triage migration` entry above was
+  left untouched (append-only log).
