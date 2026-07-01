@@ -43,63 +43,80 @@ The mission is simple. The execution is not.
 
 ## CURRENT OBJECTIVE
 
-> **Build Phase 3 hostile-input defenses and bounded GitHub archive intake.**
+> **Current phase: Phase 7 operational closeout.**
 
-The deterministic foundation is complete: app shell, marketing surface,
-logging, stateless Ollama integration, visual assets, local intake, and private
-queue/worker mechanics. The next work must safely acquire a bounded public
-GitHub archive without persisting source content.
+Source-code status: Phase 7 has landed. The deterministic intake pipeline now
+persists metadata-only scan results, system-map seed data, JS/TS symbol metadata,
+and reusable asset candidates. Source is parsed only in bounded worker memory;
+source contents, AI summaries, embeddings, semantic search, and graph
+visualization have not started.
 
-Do not build authentication flows, speculative system-map pages, or agentic
-automation before the intake contract is stable.
+Operational status: linked Supabase Phase 4-7 migrations are verified applied,
+and security/performance advisors have run through the connected Supabase
+account. The local Supabase CLI account still cannot access advisor endpoints,
+but the connector account can see project `lyclwqvmbhiwlxffcnbw` and retrieve
+advisor results.
 
-## CURRENT MILESTONE SNAPSHOT — 2026-06-11
+Next dependency: triage the advisor INFO findings before Phase 8 planning. Do
+not build Phase 8, authentication flows, AI summaries, embeddings, semantic
+search, graph visualization, or agentic automation until this Phase 7
+operational closeout is complete.
+
+## CURRENT MILESTONE SNAPSHOT - 2026-07-01
 
 Branch: `main`
 
 Completed:
 
-- App Router marketing page, dashboard shell, sidebar, and overview
+- App Router marketing page, dashboard shell, sidebar, overview, and intake UI
 - Centralized logging module, ingestion endpoint, migration, and retention SQL
 - Stateless token-budgeted Ollama chat and health endpoints
-- Project-owned visual foundation:
-  - Responsive `BrandLogo`
-  - Light/dark static logo and compact-mark variants
-  - Next.js favicon, SVG app icon, Apple touch icon, and external app-icon sizes
-  - Six product-specific placement illustrations
-  - Five reusable CSS/SVG animation components with reduced-motion support
-- Homepage hero, marketing chrome, dashboard sidebar, and dashboard ambient
-  motion integrations
-- Visual asset inventory and usage guidance in `docs/VISUAL-ASSETS.md`
-- Local-only project intake foundation:
-  - Exact public GitHub URL and separate ref validation
-  - Central resource-limit and environment-gate policy
-  - Durable `projects` and immutable queued `scans` schema
-  - Service-role-only transactional project/scan creation RPC
-  - Gated project import and scan-status APIs
-  - `/dashboard/import` form, queued status, and two-second status polling
-  - Phase 1 tests and `docs/PROJECT-INTAKE.md`
-- Private Phase 2 worker foundation:
-  - `public.scans` queue claims with row locking and leases
-  - Durable `public.scan_events` lifecycle history
-  - Heartbeats, retries, safe terminal failures, and future completion RPC
-  - Manually-run single-concurrency Node worker
-  - Metadata-only placeholder ending with `phase_3_not_implemented`
-  - Worker unit tests and `docs/INTAKE-WORKER.md`
+- Project-owned brand, illustration, and reduced-motion animation foundation
+- Local-only project intake foundation and private single-concurrency worker
+- Phase 3 bounded GitHub archive intake with metadata-only file inventory
+- Phase 4 deterministic scan results read model and dashboard results route
+- Phase 5 metadata-only system-map seed generation and compact view
+- Phase 6 TypeScript-compiler-API JS/TS symbol extraction and summary view
+- Phase 7 deterministic reusable asset candidate classification and summary view
+- Ten Supabase migrations on disk through
+  `20260615000000_create_phase_7_reusable_asset_candidates.sql`
 
 Verified:
 
-- `npm run lint`
-- `npx tsc --noEmit`
-- `npm run test` — 14 files, 117 tests
-- `npm run build`
-- SVG parsing and browser DOM/accessibility inspection
+- `main` is current at `9b82fdc688914ba98d775f75b4edd97bd71fff02`
+- `git status --short` is clean; no tracked CRLF/LF status noise is present
+- `npm ci` succeeded
+- `npm run lint` passed
+- `npx tsc --noEmit` passed
+- `npm run test` passed: 41 files, 257 tests
+- `npm run build` passed on Next.js 16.2.7
+- Linked Supabase ref is `lyclwqvmbhiwlxffcnbw`
+- `supabase migration list --linked` shows all 10 local migrations also remote,
+  including Phase 4 `20260612010000`, Phase 5 `20260612020000`,
+  Phase 6 `20260614000000`, and Phase 7 `20260615000000`
+- `supabase db push --dry-run --linked` reports the remote database is up to date
+- Connected Supabase account sees `ruizTechStudio` / `lyclwqvmbhiwlxffcnbw` as
+  `ACTIVE_HEALTHY`
+- Supabase advisors ran through the connector: security returned 7 INFO lints;
+  performance returned 12 INFO lints
+
+Needs triage:
+
+- Security advisors report `rls_enabled_no_policy` INFO findings for `logs`,
+  `projects`, `scan_events`, `scan_files`, `scan_reusable_asset_candidates`,
+  `scan_symbols`, and `scans`.
+- Performance advisors report one `unindexed_foreign_keys` INFO finding for
+  `scan_reusable_asset_candidates_project_id_fkey` and 11 `unused_index` INFO
+  findings across low-traffic scan/log indexes.
+- The local Supabase CLI account still returns `403` for advisor endpoints and
+  `supabase projects list` still omits `lyclwqvmbhiwlxffcnbw`; use the
+  connected Supabase account for advisor review until CLI auth is corrected.
 
 Not started:
 
-- Repository fetching, safe archive extraction, and deterministic scanning
-- Persistent scan evidence beyond projects and scan runs
-- System map, reusable-assets, and work-session feature surfaces
+- Phase 8 planning
+- AI summaries, embeddings, semantic search, graph visualization, and
+  work-session memory
 
 ---
 
@@ -1556,3 +1573,53 @@ as environment limits, not repository corruption.
 - CRLF/LF diff noise still persists across ~144 tracked files. A root `.gitattributes`
   (`* text=auto eol=lf`) would stop this on Windows checkouts — still not applied (out of
   scope for docs-sync).
+
+## 2026-07-01 - Phase 7 operational closeout verification
+
+### Updated
+
+- `docs/IMPLEMENTATION_LOG.md` - replaced the stale Phase 3 current objective with Phase 7
+  operational closeout status. The log now records that Phase 7 source work has landed, linked
+  Supabase Phase 4-7 migrations are verified applied, and Supabase advisors have run through
+  the connected Supabase account.
+- Public APIs, route contracts, database migrations, and TypeScript interfaces were not changed.
+
+### Verified
+
+- Git baseline: `git checkout main` and `git pull --ff-only origin main` report `main` is current
+  with `origin/main`; HEAD is `9b82fdc688914ba98d775f75b4edd97bd71fff02`; `git status --short`
+  is clean; `git diff --ignore-all-space --stat` is empty.
+- Dependency baseline: `npm ci` succeeded. It reported 5 audit vulnerabilities and a Windows
+  cleanup `EPERM` warning under `node_modules`, but did not block installation.
+- Quality gates after `npm ci`: `npm run lint` passed, `npx tsc --noEmit` passed,
+  `npm run test` passed with 41 files and 257 tests, and `npm run build` passed on Next.js 16.2.7.
+- Supabase link: `supabase/.temp/project-ref` is `lyclwqvmbhiwlxffcnbw`; Supabase CLI is
+  `2.106.0`.
+- Remote migration state: `supabase migration list --linked` shows all 10 local migrations also
+  remote, including Phase 4 `20260612010000`, Phase 5 `20260612020000`, Phase 6
+  `20260614000000`, and Phase 7 `20260615000000`.
+- Remote push state: `supabase db push --dry-run --linked` reports `Remote database is up to
+  date`; no real `supabase db push` was run.
+- Connected Supabase account: project list includes `ruizTechStudio` / `lyclwqvmbhiwlxffcnbw`
+  as `ACTIVE_HEALTHY`.
+- Security advisors ran through the connector and returned 7 INFO lints, all
+  `rls_enabled_no_policy`: `logs`, `projects`, `scan_events`, `scan_files`,
+  `scan_reusable_asset_candidates`, `scan_symbols`, and `scans`.
+- Performance advisors ran through the connector and returned 12 INFO lints: one unindexed
+  foreign key on `scan_reusable_asset_candidates_project_id_fkey` and 11 unused-index findings.
+
+### Needs triage
+
+- The local Supabase CLI account still returns `403` for both advisor commands and still omits
+  `lyclwqvmbhiwlxffcnbw` from `supabase projects list`. This is a CLI-account permission issue,
+  not a linked migration issue.
+- Advisor findings are INFO-level and require product/security triage before Phase 8. Do not
+  remove RLS, drop indexes, or add broad policies blindly.
+
+### Notes
+
+- `supabase status` fails because Docker Desktop is not running and the local stack cannot be
+  inspected. This is not required for linked migration verification and does not change the
+  remote Phase 4-7 migration status.
+- Phase 8 remains deferred until the advisor INFO findings are accepted as intentional or
+  addressed with narrowly scoped migrations.
