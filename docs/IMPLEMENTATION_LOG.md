@@ -1686,3 +1686,54 @@ as environment limits, not repository corruption.
   `IMPLEMENTATION_LOG.md` is already under `docs/`.
 - The earlier `2026-07-01 - Phase 7 advisor triage migration` entry above was
   left untouched (append-only log).
+
+## 2026-07-01 - Phase 8 shelves + automated docs-sync run
+
+### Added (from commit `2a06d93` — "feat: add Phase 8 shelves")
+
+- `supabase/migrations/20260701120000_create_phase_8_shelves.sql` — the
+  `shelf_assets` table (deny-all client RLS, GIN-indexed tsvector search,
+  dormant `visibility`/`price_cents`/`published_at` marketplace columns) with
+  service-role-only promote/search RPCs. This is the 12th migration.
+- `lib/shelves/` — `contracts.ts`, `validation.ts`, and `repository.ts`
+  (promote + bounded lexical search RPC wrappers).
+- `components/shelves/` — `shelf-library-view.tsx` and
+  `promote-candidate-button.tsx` (an "Add to shelf" action on scan-results
+  candidate cards).
+- `app/dashboard/shelves/page.tsx` — durable shelf library surface with search
+  and facet UI.
+- `app/api/shelves/route.ts` (search) and `app/api/shelves/promote/route.ts`
+  (candidate promotion) — local-only endpoints behind `isProjectIntakeEnabled()`.
+- `docs/SHELVES.md` — pointer-model rationale and the Phases 9–12 roadmap.
+- Shelf assets store provenance pointers only (owner/repo/commit/path/lines) plus
+  deterministic metadata — never source contents, consistent with the existing
+  intake boundary.
+
+### Updated
+
+- `AGENTS.md` Project Structure tree brought in sync with the Phase 8 code: added
+  the `app/api/shelves/`, `app/dashboard/shelves/`, `components/shelves/`, and
+  `lib/shelves/` entries, and corrected the migrations note from 11 to 12
+  (adding phase 8 shelves) and the `docs/` listing to include `SHELVES`. The
+  AGENTS.md prose sections (Current State, Completed, Architecture Rules, Next
+  Steps) already described Phase 8; only the structure tree was stale.
+
+### Verified
+
+- `git log` confirms the newest application source is the Phase 8 shelves feature
+  commit `2a06d93`; the migration file `20260701120000_create_phase_8_shelves.sql`
+  is present and is the 12th migration.
+- The three canonical documents hold their fixed roles: `AGENTS.md` (status,
+  root, footer 2026-07-01), `README.md` (setup-only, status pointer to AGENTS.md,
+  footer 2026-07-01), and `docs/IMPLEMENTATION_LOG.md` (history).
+- `git diff --ignore-all-space --stat` is empty: the large working-tree diff
+  (144 files, equal insertions/deletions) is CRLF/LF line-ending noise only, not
+  substantive source change.
+
+### Notes
+
+- No root .md files required migration or relocation. Root holds only `AGENTS.md`,
+  `README.md`, and `CLAUDE.md` (an `@AGENTS.md` include with no status narration).
+- Per AGENTS.md, `20260701120000_create_phase_8_shelves.sql` is checked in but
+  still needs to be applied to the linked Supabase project, followed by an
+  advisor re-run, before the shelf surface is exercised.

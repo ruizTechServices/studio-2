@@ -89,12 +89,14 @@ studio-2/
 │   │   ├── ai/health/route.ts      # GET /api/ai/health — Ollama reachability probe
 │   │   ├── log/route.ts            # POST /api/log — client-side log ingestion
 │   │   ├── projects/import/route.ts # POST /api/projects/import — local-only queued scan creation
-│   │   └── scans/[scanId]/route.ts # GET /api/scans/[scanId] — local-only safe scan status
+│   │   ├── scans/[scanId]/route.ts # GET /api/scans/[scanId] — local-only safe scan status
+│   │   └── shelves/               # P8: route.ts (search), promote/route.ts (candidate promotion)
 │   ├── dashboard/
 │   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
 │   │   ├── page.tsx                # Dashboard overview page
 │   │   ├── import/page.tsx         # Local-only public GitHub intake surface
-│   │   └── projects/[projectId]/scans/[scanId]/page.tsx # Deterministic scan results view
+│   │   ├── projects/[projectId]/scans/[scanId]/page.tsx # Deterministic scan results view
+│   │   └── shelves/page.tsx        # P8: durable shelf library (search + facets)
 │   ├── layout.tsx                  # Root layout — fonts, global styles
 │   └── page.tsx                    # Marketing landing page
 ├── components/
@@ -106,6 +108,7 @@ studio-2/
 │   │   └── scan-results/           # scan-results-view, system-map-seed-view (P5),
 │   │                               # symbol-summary-view (P6), reusable-asset-candidates-view (P7)
 │   ├── marketing/                  # marketing-navbar.tsx, marketing-footer.tsx
+│   ├── shelves/                    # P8: shelf-library-view, promote-candidate-button
 │   └── ui/                         # shadcn/ui components (button.tsx)
 ├── config/                         # navigation.ts (dashboard nav), site.ts (siteConfig)
 ├── lib/
@@ -120,20 +123,21 @@ studio-2/
 │   │   ├── symbols/                # Phase 6: contracts, extract (TS-compiler-API symbol extraction)
 │   │   ├── reusable-assets/        # Phase 7: contracts, classify (candidate scoring)
 │   │   └── worker/                 # Phase 2: config, contracts, failures, processor, repository, runner
+│   ├── shelves/                    # Phase 8: contracts, validation, repository (promote + search RPCs)
 │   ├── client.ts                   # Supabase browser client
 │   ├── server.ts                   # Supabase server client (RSC / Server Actions)
 │   ├── middleware.ts               # Supabase session middleware helper
 │   └── utils.ts                    # cn() utility
 ├── scripts/intake-worker.ts        # CLI entry — worker:intake / worker:intake:once
 ├── supabase/
-│   ├── migrations/                 # 11 migrations: logs, intake foundation, grants,
+│   ├── migrations/                 # 12 migrations: logs, intake foundation, grants,
 │   │                               # worker foundation, claim fix, phase 3 archive,
 │   │                               # phase 4 read, phase 5 system-map seed read,
 │   │                               # phase 6 symbol scanning, phase 7 reusable asset candidates,
-│   │                               # phase 7 advisor triage
+│   │                               # phase 7 advisor triage, phase 8 shelves
 │   └── sql/enable_logs_retention.sql # pg_cron daily purge (logs > 30d) — opt-in
 ├── docs/                           # IMPLEMENTATION_LOG, INTAKE-WORKER, LOGGING, OLLAMA,
-│                                   # PROJECT-INTAKE, SDLC, VISUAL-ASSETS, misc/
+│                                   # PROJECT-INTAKE, SDLC, SHELVES, VISUAL-ASSETS, misc/
 └── public/                         # brand/, illustrations/, images/
 ```
 
