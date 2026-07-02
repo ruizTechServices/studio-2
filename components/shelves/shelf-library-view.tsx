@@ -1,6 +1,7 @@
 import { Library, Search } from 'lucide-react'
 import Link from 'next/link'
 
+import { SourcePreviewPanel } from '@/components/shelves/source-preview-panel'
 import type {
   ShelfName,
   ShelfSearchQuery,
@@ -161,6 +162,8 @@ export function ShelfLibraryView({
                   ))}
                 </ul>
               ) : null}
+
+              <SourcePreviewPanel assetId={asset.id} />
             </article>
           ))}
         </div>

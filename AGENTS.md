@@ -12,7 +12,7 @@ This is a **codebase intelligence studio** — not a generic SaaS app. The produ
 
 ## Current State (as of 2026-07-01)
 
-Latest phase: **Phase 8 shelves (durable reusable asset library)**. Phase 7 candidates can now be promoted into `shelf_assets` — a durable, cross-scan, lexically searchable library of provenance pointers (owner/repo/commit/path/lines; no source contents). The Phase 8 migration (`20260701120000_create_phase_8_shelves.sql`) is checked in but **not yet applied to the linked Supabase project** — apply it and re-run advisors before exercising the shelf surface. Source is parsed only in bounded worker memory; source contents, AI summaries, embeddings, semantic search, and graph visualization have not started. See `docs/SHELVES.md` for the pointer-model rationale and the phased roadmap (retrieval-on-demand → semantic search → workspace → marketplace).
+Latest phase: **Phase 9 retrieval-on-demand (bounded source preview)**. The Phase 8 shelf loop is verified end to end against the linked Supabase project (scan → promote → search → re-scan version bump), migration history is aligned (`20260701120000` repaired after a manual SQL-editor apply), and Phase 9 adds on-demand source preview: a shelf asset's file is fetched from GitHub at its pinned 40-hex commit, sliced in route-handler memory (256 KiB / 200 lines / 500 chars-per-line / 8 s bounds), and returned to the local-only surface — never persisted or logged. Source contents are never stored; AI summaries, embeddings, semantic search, and graph visualization have not started. See `docs/SHELVES.md` for the pointer-model rationale and the remaining roadmap (semantic search → workspace → marketplace).
 
 Completed since initial scaffold:
 - `lib/logger/` — full logging module (types, sanitizer, validator, server writer, client poster)
@@ -59,7 +59,9 @@ Completed since initial scaffold:
 - `lib/shelves/` + `components/shelves/` + `app/dashboard/shelves/page.tsx` — Phase 8 durable shelf library: candidate promotion, versioned provenance-pointer assets, bounded lexical search, facet UI, and an "Add to shelf" action on scan-results candidate cards
 - `app/api/shelves/route.ts` + `app/api/shelves/promote/route.ts` — local-only shelf search and promotion endpoints
 - `supabase/migrations/20260701120000_create_phase_8_shelves.sql` — `shelf_assets` table (deny-all RLS, GIN-indexed tsvector search, dormant marketplace columns) with service-role-only promote/search RPCs
-- `docs/SHELVES.md` — shelf architecture, pointer-model rationale, and Phases 9–12 roadmap
+- `lib/shelves/retrieval/` + `app/api/shelves/[assetId]/source/route.ts` + `components/shelves/source-preview-panel.tsx` — Phase 9 bounded retrieval-on-demand: pointer RPC read, hostile-path/SHA validation, bounded GitHub raw fetch, in-memory line slicing, and a "Preview source" panel on shelf cards
+- `supabase/migrations/20260701233155_create_phase_9_shelf_retrieval_pointer.sql` — service-role-only `get_shelf_asset_retrieval_pointer` RPC
+- `docs/SHELVES.md` — shelf architecture, pointer-model rationale, Phase 9 retrieval documentation, and Phases 10–12 roadmap
 
 ## Tech Stack
 
@@ -90,7 +92,8 @@ studio-2/
 │   │   ├── log/route.ts            # POST /api/log — client-side log ingestion
 │   │   ├── projects/import/route.ts # POST /api/projects/import — local-only queued scan creation
 │   │   ├── scans/[scanId]/route.ts # GET /api/scans/[scanId] — local-only safe scan status
-│   │   └── shelves/               # P8: route.ts (search), promote/route.ts (candidate promotion)
+│   │   └── shelves/               # P8: route.ts (search), promote/route.ts (candidate promotion);
+│   │                               # P9: [assetId]/source/route.ts (bounded source preview)
 │   ├── dashboard/
 │   │   ├── layout.tsx              # Dashboard layout (wraps AppShell)
 │   │   ├── page.tsx                # Dashboard overview page
@@ -108,7 +111,7 @@ studio-2/
 │   │   └── scan-results/           # scan-results-view, system-map-seed-view (P5),
 │   │                               # symbol-summary-view (P6), reusable-asset-candidates-view (P7)
 │   ├── marketing/                  # marketing-navbar.tsx, marketing-footer.tsx
-│   ├── shelves/                    # P8: shelf-library-view, promote-candidate-button
+│   ├── shelves/                    # P8: shelf-library-view, promote-candidate-button; P9: source-preview-panel
 │   └── ui/                         # shadcn/ui components (button.tsx)
 ├── config/                         # navigation.ts (dashboard nav), site.ts (siteConfig)
 ├── lib/
@@ -124,6 +127,7 @@ studio-2/
 │   │   ├── reusable-assets/        # Phase 7: contracts, classify (candidate scoring)
 │   │   └── worker/                 # Phase 2: config, contracts, failures, processor, repository, runner
 │   ├── shelves/                    # Phase 8: contracts, validation, repository (promote + search RPCs)
+│   │   └── retrieval/              # Phase 9: contracts, validation, github-source-client, line-slicer, repository
 │   ├── client.ts                   # Supabase browser client
 │   ├── server.ts                   # Supabase server client (RSC / Server Actions)
 │   ├── middleware.ts               # Supabase session middleware helper
@@ -153,6 +157,7 @@ studio-2/
 - **Project intake**: intake is local-only and production-hidden. Validate through `lib/intake/`, never fetch submitted URLs directly, never expose service-role access to clients, and never persist or log source contents. See `docs/PROJECT-INTAKE.md`.
 - **Scan results, system-map seed, symbols, and reusable-asset candidates**: derive compact deterministic models from private `scan_files`/symbol metadata only. Source is parsed only in bounded worker memory and is never persisted, logged, returned, or written to disk. No graph canvas, AI, embeddings, or semantic search. Read through `lib/intake/results/`; build through `lib/intake/system-map/` (P5), `lib/intake/symbols/` (P6 TS-compiler-API extraction), and `lib/intake/reusable-assets/` (P7 candidate scoring). Candidates require review and are not guaranteed reusable.
 - **Shelves (P8)**: shelf assets are provenance pointers (owner/repo/commit/path/lines) plus deterministic metadata — never source contents. Promotion is an explicit human action from scan results. Validate through `lib/shelves/validation.ts`, persist and search only through `lib/shelves/repository.ts` RPC wrappers, and keep the surface behind `isProjectIntakeEnabled()`. Marketplace columns (`visibility`, `price_cents`, `published_at`) stay dormant until an auth + billing phase. See `docs/SHELVES.md`.
+- **Retrieval-on-demand (P9)**: source previews are fetched only from `raw.githubusercontent.com` at the asset's pinned 40-hex commit through `lib/shelves/retrieval/github-source-client.ts` (no redirects, 256 KiB byte cap, binary rejection, 8 s timeout), sliced in memory via `lib/shelves/retrieval/line-slicer.ts` (200 lines, 500 chars/line), and returned with `cache-control: no-store`. Validate pointers with `lib/shelves/retrieval/validation.ts` before any fetch. Never persist, log, or write fetched source to disk. Phase 9 is deterministic retrieval only — no AI interpretation.
 - **Config**: site metadata → `config/site.ts` (`siteConfig`). Dashboard nav items → `config/navigation.ts` (`dashboardNavigation`).
 - **Visual assets**: use `BrandLogo` for in-product branding (static light/dark variants only when assets leave the application), static assets from `public/brand/` and `public/illustrations/`, and reusable motion from `components/animations/` — no one-off motion for feature pages. All motion must respect `prefers-reduced-motion`. Meaningful images require useful alt text; decorative animations must be hidden from assistive technology. See `docs/VISUAL-ASSETS.md`.
 - **Testing**: Vitest (`npm run test`). Test files co-located with source (`.test.ts`). Coverage via `npm run test:coverage`.
@@ -173,12 +178,12 @@ The studio is a tool developers use when inheriting, recovering, or deeply under
 
 ## Next Steps (in order)
 
-1. Apply `20260701120000_create_phase_8_shelves.sql` to the linked Supabase project, then run security and performance advisors.
-2. Exercise the shelf loop end to end locally: scan a repo → promote candidates → search `/dashboard/shelves` → re-scan at a newer commit and confirm version bumps.
-3. Design Phase 9 retrieval-on-demand (bounded fetch of a shelf asset's file at its pinned commit, sliced in memory, never persisted) — see `docs/SHELVES.md`.
+1. Run security and performance advisors on the linked project from a dashboard account with sufficient privileges (CLI/MCP advisor access currently returns 403) and triage any new findings from the Phase 8/9 objects.
+2. Exercise Phase 9 in the browser (expand "Preview source" on a shelf card) and against edge cases: binary files, oversized files, deleted upstream repositories.
+3. Add semantic search (pgvector + local Ollama embeddings over `search_text`) — Phase 10 — now that retrieval-on-demand is stable.
 4. Treat the remaining performance advisor `unused_index` INFO findings as deferred until real scan/log traffic can prove whether any index is waste.
 5. Decide whether 30-day log retention is required; run `supabase/sql/enable_logs_retention.sql` only after confirming `pg_cron`.
-6. After retrieval-on-demand is stable, add semantic search (pgvector + local Ollama embeddings over `search_text`) before any workspace or marketplace surface.
+6. Design the Phase 11 workspace (asset palette dropping shelf assets into a working tree via retrieval-on-demand) only after semantic search lands.
 
 ## Environment Variables
 
